@@ -13,7 +13,7 @@ export const loader = async ({ params }: LoaderArgs) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw json("User not found", { status: 404 });
   }
 
   return json({ user, isAdmin: user.username === "administrador" });
