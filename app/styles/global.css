@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+:root {
+  --bronze-1: hsl(15, 30.0%, 99.1%);
+  --bronze-2: hsl(17, 63.6%, 97.8%);
+  --bronze-3: hsl(17, 42.1%, 95.2%);
+  --bronze-4: hsl(17, 35.2%, 92.1%);
+  --bronze-5: hsl(17, 31.5%, 88.2%);
+  --bronze-6: hsl(17, 29.0%, 83.0%);
+  --bronze-7: hsl(17, 26.9%, 75.6%);
+  --bronze-8: hsl(17, 25.1%, 66.5%);
+  --bronze-9: hsl(17, 20.0%, 54.0%);
+  --bronze-10: hsl(17, 17.9%, 49.3%);
+  --bronze-11: hsl(15, 20.0%, 41.0%);
+  --bronze-12: hsl(12, 22.0%, 21.5%);
+
+  --bronze-a1: hsla(0, 89.3%, 18.3%, 0.012);
+  --bronze-a2: hsla(17, 95.1%, 40.1%, 0.036);
+  --bronze-a3: hsla(18, 98.3%, 29.8%, 0.067);
+  --bronze-a4: hsla(17, 99.6%, 26.0%, 0.106);
+  --bronze-a5: hsla(19, 99.6%, 23.8%, 0.157);
+  --bronze-a6: hsla(17, 99.2%, 22.5%, 0.220);
+  --bronze-a7: hsla(18, 99.7%, 21.6%, 0.310);
+  --bronze-a8: hsla(17, 99.5%, 20.2%, 0.420);
+  --bronze-a9: hsla(18, 99.9%, 16.7%, 0.553);
+  --bronze-a10: hsla(17, 99.0%, 14.9%, 0.597);
+  --bronze-a11: hsla(15, 99.5%, 12.0%, 0.671);
+  --bronze-a12: hsla(12, 98.7%, 5.7%, 0.832);
+
+  --gray-1: hsl(0, 0%, 99.0%);
+  --gray-2: hsl(0, 0%, 97.5%);
+  --gray-3: hsl(0, 0%, 94.6%);
+  --gray-4: hsl(0, 0%, 92.0%);
+  --gray-5: hsl(0, 0%, 89.5%);
+  --gray-6: hsl(0, 0%, 86.8%);
+  --gray-7: hsl(0, 0%, 83.0%);
+  --gray-8: hsl(0, 0%, 73.2%);
+  --gray-9: hsl(0, 0%, 55.2%);
+  --gray-10: hsl(0, 0%, 50.3%);
+  --gray-11: hsl(0, 0%, 39.3%);
+  --gray-12: hsl(0, 0%, 12.5%);
+
+  --container-padding: 20px;
+  --container-background: var(--bronze-2);
+  --element-background-alpha: var(--bronze-a3);
+  --element-background: var(--bronze-3);
+  --element-padding: 8px;
+  --element-text-color: var(--bronze-11);
+  --element-border-radius: 3px;
+  --text-color: var(--gray-12);
+  --text-size: 16px;
+  --separator: var(--bronze-6);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: calc(100vh - env(safe-area-inset-bottom));
+
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+  background-color: var(--bronze-1);
+  font-size: var(--text-size);
+}
+
+a {
+  text-decoration: none;
+  color: var(--bronze-a11);
+  text-decoration-color: var(--bronze-a5);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.form-element-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.form-element-container input {
+  font-family: 'Inter', sans-serif;
+  height: 32px;
+  padding: var(--element-padding);
+  font-size: var(--text-size);
+}
+
+button[type="submit"] {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--text-size);
+  padding: 4px 12px;
+}
+
