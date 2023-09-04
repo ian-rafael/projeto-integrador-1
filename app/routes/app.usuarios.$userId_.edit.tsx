@@ -4,8 +4,11 @@ import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
+import { requireUserId } from "~/utils/session.server";
 
-export const loader = async ({ params }: LoaderArgs) => {
+export const loader = async ({ request, params }: LoaderArgs) => {
+  await requireUserId(request);
+
   invariant(params.userId, "params.userId is required");
 
   const user = await db.user.findUnique({
@@ -21,6 +24,8 @@ export const loader = async ({ params }: LoaderArgs) => {
 };
 
 export const action = async ({ request, params }: ActionArgs) => {
+  await requireUserId(request);
+
   invariant(params.userId, "params.userId is required");
 
   const form = await request.formData();
