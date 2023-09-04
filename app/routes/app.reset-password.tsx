@@ -24,14 +24,12 @@ export const action = async ({ request }: ActionArgs) => {
 
   const fieldErrors = {
     password: password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
-  const formError = password !== repeatPassword
-    ? "As senhas devem ser iguais"
-    : null;
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
       fieldErrors,
-      formError,
+      formError: null,
     });
   }
 
@@ -58,10 +56,10 @@ export default function ResetPassword () {
             type="password"
             required={true}
             aria-invalid={Boolean(actionData?.fieldErrors?.password)}
-            aria-errormessage={actionData?.fieldErrors?.password ? "name-error" : undefined}
+            aria-errormessage={actionData?.fieldErrors?.password ? "password-error" : undefined}
           />
           {actionData?.fieldErrors?.password ? (
-            <p className="form-validation-error" id="name-error" role="alert">
+            <p className="form-validation-error" id="password-error" role="alert">
               {actionData.fieldErrors.password}
             </p>
           ) : null}
@@ -73,7 +71,14 @@ export default function ResetPassword () {
             name="repeat-password"
             type="password"
             required={true}
+            aria-invalid={Boolean(actionData?.fieldErrors?.repeatPassword)}
+            aria-errormessage={actionData?.fieldErrors?.repeatPassword ? "repeat-password-error" : undefined}
           />
+          {actionData?.fieldErrors?.repeatPassword ? (
+            <p className="form-validation-error" id="repeat-password-error" role="alert">
+              {actionData.fieldErrors.repeatPassword}
+            </p>
+          ) : null}
         </div>
         {actionData?.formError ? (
           <p className="form-validation-error" role="alert">{actionData.formError}</p>

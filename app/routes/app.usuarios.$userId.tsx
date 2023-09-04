@@ -49,7 +49,11 @@ export default function UserView () {
       </div>
       <div className="view-item">
         <b>Criado em: </b>
-        <span>{new Date(user.createdAt).toLocaleString()}</span>
+        <span>
+          {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+          {', '}
+          {new Date(user.createdAt).toLocaleTimeString("pt-BR")}
+        </span>
       </div>
       {!isAdmin ? (
         <div className="view-actions">
