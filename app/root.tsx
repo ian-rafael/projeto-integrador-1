@@ -1,4 +1,4 @@
-import type { LinksFunction, V2_MetaFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -14,7 +14,7 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
 ];
 
-export const meta: V2_MetaFunction = () => [
+export const meta: MetaFunction = () => [
   { title: "Projeto Integrador" },
 ];
 
@@ -23,7 +23,7 @@ export default function App() {
     <html lang="pt-BR">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>

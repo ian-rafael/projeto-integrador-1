@@ -1,11 +1,11 @@
-import { redirect, type ActionArgs } from "@remix-run/node";
+import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
 
   const form = await request.formData();

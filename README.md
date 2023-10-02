@@ -72,3 +72,7 @@ yarn prisma db push
 ```sh
 yarn prisma db seed
 ```
+
+## Requirements
+
+- Node 18

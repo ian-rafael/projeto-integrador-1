@@ -1,4 +1,4 @@
-import { json, redirect, type ActionArgs, type LoaderArgs } from "@remix-run/node";
+import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
@@ -6,7 +6,7 @@ import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 
-export const loader = async ({ request, params }: LoaderArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
 
   invariant(params.userId, "params.userId is required");
@@ -23,7 +23,7 @@ export const loader = async ({ request, params }: LoaderArgs) => {
   return json({ user });
 };
 
-export const action = async ({ request, params }: ActionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
   invariant(params.userId, "params.userId is required");

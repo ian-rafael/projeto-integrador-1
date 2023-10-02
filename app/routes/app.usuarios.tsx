@@ -1,9 +1,9 @@
-import { json, type LoaderArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   await requireUserId(request);
 
   const users = await db.user.findMany({

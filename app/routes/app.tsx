@@ -1,4 +1,4 @@
-import { redirect, type LoaderArgs, type LinksFunction, json } from "@remix-run/node";
+import { redirect, type LoaderFunctionArgs, type LinksFunction, json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { getUser } from "~/utils/session.server";
 
@@ -8,7 +8,7 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
 ];
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);
   if (!user) {
     throw redirect("/login");
