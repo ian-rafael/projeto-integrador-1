@@ -93,6 +93,12 @@ a:hover {
   font-size: var(--text-size);
 }
 
+.form-element-container textarea {
+  font-family: 'Inter', sans-serif;
+  padding: var(--element-padding);
+  font-size: var(--text-size);
+}
+
 button[type="submit"] {
   font-family: 'Inter', sans-serif;
   font-size: var(--text-size);
