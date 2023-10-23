@@ -1,6 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import Address, { type AddressType } from "~/components/address";
 import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -12,7 +13,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.supplierId, "params.supplierId is required");
 
   const supplier = await db.supplier.findUnique({
-    select: { name: true, email: true, cnpj: true, phone: true },
+    select: { name: true, email: true, cnpj: true, phone: true, address: true },
     where: { id: params.supplierId },
   });
 
@@ -20,7 +21,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Supplier not found", { status: 404 });
   }
 
-  return json({ supplier });
+  return json({ supplier: { ...supplier, address: supplier.address as AddressType } });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -33,12 +34,22 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const cnpj = form.get("cnpj");
   const email = form.get("email");
   const phone = form.get("phone");
+  const zipcode = form.get("zipcode");
+  const state = form.get("state");
+  const city = form.get("city");
+  const street = form.get("street");
+  const number = form.get("number");
 
   if (
     typeof name !== "string"
     || typeof cnpj !== "string"
     || typeof email !== "string"
     || typeof phone !== "string"
+    || typeof zipcode !== "string"
+    || typeof state !== "string"
+    || typeof city !== "string"
+    || typeof street !== "string"
+    || typeof number !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -53,6 +64,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     cnpj: false ? "" : undefined,
     email: false ? "" : undefined,
     phone: false ? "" : undefined,
+    zipcode: false ? "" : undefined,
+    state: false ? "" : undefined,
+    city: false ? "" : undefined,
+    street: false ? "" : undefined,
+    number: false ? "" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -62,9 +78,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     });
   }
 
+  const address = { zipcode, state, city, street, number: number ? Number(number) : number };
   const supplier = await db.supplier.update({
     where: { id: params.supplierId },
-    data: { name, cnpj, email, phone },
+    data: { name, cnpj, email, phone, address },
   });
 
   return redirect("/app/fornecedores/" + supplier.id);
@@ -106,6 +123,16 @@ export default function UserEdit () {
         label="Telefone"
         required={true}
         type="text"
+      />
+      <Address 
+        defaultValues={supplier.address}
+        errorMessages={{
+          zipcode: actionData?.fieldErrors?.zipcode,
+          state: actionData?.fieldErrors?.state,
+          city: actionData?.fieldErrors?.city,
+          street: actionData?.fieldErrors?.street,
+          number: actionData?.fieldErrors?.number,
+        }}
       />
       {actionData?.formError ? (
         <p className="form-validation-error" role="alert">

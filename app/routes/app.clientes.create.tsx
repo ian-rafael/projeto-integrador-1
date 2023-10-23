@@ -1,5 +1,6 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
+import Address from "~/components/address";
 import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -13,12 +14,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const cpf = form.get("cpf");
   const email = form.get("email");
   const phone = form.get("phone");
+  const zipcode = form.get("zipcode");
+  const state = form.get("state");
+  const city = form.get("city");
+  const street = form.get("street");
+  const number = form.get("number");
 
   if (
     typeof name !== "string"
     || typeof cpf !== "string"
     || typeof email !== "string"
     || typeof phone !== "string"
+    || typeof zipcode !== "string"
+    || typeof state !== "string"
+    || typeof city !== "string"
+    || typeof street !== "string"
+    || typeof number !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -42,8 +53,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
+  const address = { zipcode, state, city, street, number: number ? Number(number) : number };
   const customer = await db.customer.create({
-    data: { name, cpf, email, phone },
+    data: { name, cpf, email, phone, address },
   });
 
   return redirect("/app/clientes/" + customer.id);
@@ -81,6 +93,7 @@ export default function UserCreate () {
         label="Telefone"
         type="text"
       />
+      <Address/>
       {actionData?.formError ? (
         <p className="form-validation-error" role="alert">
           {actionData.formError}

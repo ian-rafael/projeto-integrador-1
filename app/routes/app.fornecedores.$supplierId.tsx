@@ -1,6 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import type { AddressType } from "~/components/address";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -11,7 +12,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.supplierId, "params.supplier is required");
 
   const supplier = await db.supplier.findUnique({
-    select: { name: true, email: true, cnpj: true, phone: true, createdAt: true },
+    select: { name: true, email: true, cnpj: true, phone: true, createdAt: true, address: true },
     where: { id: params.supplierId },
   });
 
@@ -19,7 +20,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Supplier not found", { status: 404 });
   }
 
-  return json({ supplier });
+  return json({ supplier: {...supplier, address: supplier.address as AddressType } });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -59,6 +60,12 @@ export default function UserView () {
       <div className="view-item">
         <b>Telefone: </b>
         <span>{supplier.phone}</span>
+      </div>
+      <div className="view-item">
+        <b>Endereço: </b>
+        <p>{supplier.address.street}, {supplier.address.number}</p>
+        <p>{supplier.address.city} - {supplier.address.state}</p>
+        <p>{supplier.address.zipcode}</p>
       </div>
       <div className="view-item">
         <b>Criado em: </b>

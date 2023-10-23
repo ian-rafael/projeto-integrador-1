@@ -1,6 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import Address, { type AddressType } from "~/components/address";
 import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -12,7 +13,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.customerId, "params.customerId is required");
 
   const customer = await db.customer.findUnique({
-    select: { name: true, email: true, cpf: true, phone: true },
+    select: { name: true, email: true, cpf: true, phone: true, address: true },
     where: { id: params.customerId },
   });
 
@@ -20,7 +21,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Customer not found", { status: 404 });
   }
 
-  return json({ customer });
+  return json({ customer: { ...customer, address: customer.address as AddressType } });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -33,12 +34,22 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const cpf = form.get("cpf");
   const email = form.get("email");
   const phone = form.get("phone");
+  const zipcode = form.get("zipcode");
+  const state = form.get("state");
+  const city = form.get("city");
+  const street = form.get("street");
+  const number = form.get("number");
 
   if (
     typeof name !== "string"
     || typeof cpf !== "string"
     || typeof email !== "string"
     || typeof phone !== "string"
+    || typeof zipcode !== "string"
+    || typeof state !== "string"
+    || typeof city !== "string"
+    || typeof street !== "string"
+    || typeof number !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -53,6 +64,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     cpf: false ? "" : undefined,
     email: false ? "" : undefined,
     phone: false ? "" : undefined,
+    zipcode: false ? "" : undefined,
+    state: false ? "" : undefined,
+    city: false ? "" : undefined,
+    street: false ? "" : undefined,
+    number: false ? "" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -62,9 +78,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     });
   }
 
+  const address = { zipcode, state, city, street, number: number ? Number(number) : number };
   const customer = await db.customer.update({
     where: { id: params.customerId },
-    data: { name, cpf, email, phone },
+    data: { name, cpf, email, phone, address },
   });
 
   return redirect("/app/clientes/" + customer.id);
@@ -106,6 +123,16 @@ export default function UserEdit () {
         label="Telefone"
         required={true}
         type="text"
+      />
+      <Address
+        defaultValues={customer.address}
+        errorMessages={{
+          zipcode: actionData?.fieldErrors?.zipcode,
+          state: actionData?.fieldErrors?.state,
+          city: actionData?.fieldErrors?.city,
+          street: actionData?.fieldErrors?.street,
+          number: actionData?.fieldErrors?.number,
+        }}
       />
       {actionData?.formError ? (
         <p className="form-validation-error" role="alert">

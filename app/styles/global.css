@@ -87,6 +87,7 @@ a:hover {
 }
 
 .form-element-container input {
+  width: 100%;
   font-family: 'Inter', sans-serif;
   height: 32px;
   padding: var(--element-padding);
@@ -105,3 +106,16 @@ button[type="submit"] {
   padding: 4px 12px;
 }
 
+fieldset {
+  padding: var(--element-padding);
+  margin-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.col {
+  flex: 1;
+}
