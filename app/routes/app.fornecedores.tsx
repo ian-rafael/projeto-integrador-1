@@ -12,7 +12,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ suppliers });
 };
 
-export default function Users () {
+export default function Suppliers () {
   const { suppliers } = useLoaderData<typeof loader>();
   return (
     <div className="index">

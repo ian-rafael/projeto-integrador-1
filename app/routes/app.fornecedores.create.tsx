@@ -61,7 +61,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return redirect("/app/fornecedores/" + supplier.id);
 };
 
-export default function UserCreate () {
+export default function SupplierCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">

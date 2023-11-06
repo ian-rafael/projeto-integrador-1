@@ -41,6 +41,8 @@ model Supplier {
   phone   String
   address Json
 
+  purchases Purchase[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -51,6 +53,16 @@ model Product {
   code        String
   price       Float
   description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Purchase {
+  id String @id @default(uuid())
+
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  supplierId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

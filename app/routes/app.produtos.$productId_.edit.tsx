@@ -70,7 +70,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return redirect("/app/produtos/" + product.id);
 };
 
-export default function UserEdit () {
+export default function ProductEdit () {
   const { product } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (

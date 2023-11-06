@@ -49,7 +49,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return redirect("/app/produtos/" + product.id);
 };
 
-export default function UserCreate () {
+export default function ProductCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">

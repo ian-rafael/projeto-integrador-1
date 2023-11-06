@@ -87,7 +87,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return redirect("/app/clientes/" + customer.id);
 };
 
-export default function UserEdit () {
+export default function CustomerEdit () {
   const { customer } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (

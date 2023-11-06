@@ -86,10 +86,11 @@ a:hover {
   margin-bottom: 8px;
 }
 
-.form-element-container input {
+.form-element-container input,
+.form-element-container select {
   width: 100%;
   font-family: 'Inter', sans-serif;
-  height: 32px;
+  height: 40px;
   padding: var(--element-padding);
   font-size: var(--text-size);
 }

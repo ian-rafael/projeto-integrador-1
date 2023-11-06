@@ -36,6 +36,9 @@ export default function App () {
             <li>
               <Link to = "produtos">Produtos</Link>
             </li>
+            <li>
+              <Link to = "compras">Compras</Link>
+            </li>
           </ul>
         </nav>
         <div className="user-info">

@@ -8,64 +8,60 @@ import { requireUserId } from "~/utils/session.server";
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.productId, "params.productId is required");
+  invariant(params.purchaseId, "params.userId is required");
 
-  const product = await db.product.findUnique({
-    select: { name: true, code: true, price: true, description: true, createdAt: true },
-    where: { id: params.productId },
+  const purchase = await db.purchase.findUnique({
+    select: {
+      createdAt: true,
+      supplier: { select: { name: true } },
+    },
+    where: { id: params.purchaseId },
   });
 
-  if (!product) {
-    throw json("Product not found", { status: 404 });
+  if (!purchase) {
+    throw json("Purchase not found", { status: 404 });
   }
 
-  return json({ product });
+  return json({
+    purchase: {
+      createdAt: purchase.createdAt,
+      supllierName: purchase.supplier.name,
+    },
+  });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.productId, "params.productId is required");
+  invariant(params.purchaseId, "params.purchaseId is required");
 
   const form = await request.formData();
   const intent = form.get("intent");
   if (intent === "delete") {
-    await db.product.delete({
-      where: { id: params.productId },
+    await db.purchase.delete({
+      where: { id: params.purchaseId },
     });
-    return redirect("/app/produtos");
+    return redirect("/app/compras");
   }
   return badRequest({
     formError: "Intent precisa ser 'delete'",
   });
 };
 
-export default function ProductView () {
-  const { product } = useLoaderData<typeof loader>();
+export default function PurchaseView () {
+  const {purchase} = useLoaderData<typeof loader>();
   return (
     <div>
       <div className="view-item">
-        <b>Nome: </b>
-        <span>{product.name}</span>
-      </div>
-      <div className="view-item">
-        <b>Código: </b>
-        <span>{product.code}</span>
-      </div>
-      <div className="view-item">
-        <b>Preço: </b>
-        <span>{product.price}</span>
-      </div>
-      <div className="view-item">
-        <b>Descrição: </b>
-        <span>{product.description}</span>
+        <b>Fornecedor: </b>
+        <span>{purchase.supllierName}</span>
       </div>
       <div className="view-item">
         <b>Criado em: </b>
         <span>
-          {new Date(product.createdAt).toLocaleDateString("pt-BR")}
+          {new Date(purchase.createdAt).toLocaleDateString("pt-BR")}
           {', '}
-          {new Date(product.createdAt).toLocaleTimeString("pt-BR")}
+          {new Date(purchase.createdAt).toLocaleTimeString("pt-BR")}
         </span>
       </div>
       <div className="view-actions">

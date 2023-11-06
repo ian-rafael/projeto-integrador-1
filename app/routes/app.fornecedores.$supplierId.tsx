@@ -41,7 +41,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   });
 };
 
-export default function UserView () {
+export default function SupplierView () {
   const { supplier } = useLoaderData<typeof loader>();
   return (
     <div>
