@@ -2,6 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
+import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -45,7 +46,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     });
   }
 
-  const fields = { name, username, password };
+  const fields = { name, username };
   const fieldErrors = {
     name: false ? "" : undefined,
     username: false ? "" : undefined,
@@ -77,55 +78,29 @@ export default function UserEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
-      <div className="form-element-container">
-        <label htmlFor="name-input">Nome</label>
-        <input
-          id="name-input"
-          name="name"
-          type="text"
-          required={true}
-          aria-invalid={Boolean(actionData?.fieldErrors?.name)}
-          aria-errormessage={actionData?.fieldErrors?.name ? "name-error" : undefined}
-          defaultValue={user.name}
-        />
-        {actionData?.fieldErrors?.name ? (
-          <p className="form-validation-error" id="name-error" role="alert">
-            {actionData.fieldErrors.name}
-          </p>
-        ) : null}
-      </div>
-      <div className="form-element-container">
-        <label htmlFor="username-input">Nome de usuário</label>
-        <input
-          id="username-input"
-          name="username"
-          type="text"
-          required={true}
-          aria-invalid={Boolean(actionData?.fieldErrors?.username)}
-          aria-errormessage={actionData?.fieldErrors?.username ? "username-error" : undefined}
-          defaultValue={user.username}
-        />
-        {actionData?.fieldErrors?.username ? (
-          <p className="form-validation-error" id="username-error" role="alert">
-            {actionData.fieldErrors.username}
-          </p>
-        ) : null}
-      </div>
-      <div className="form-element-container">
-        <label htmlFor="password-input">Nova senha</label>
-        <input
-          id="password-input"
-          name="password"
-          type="password"
-          aria-invalid={Boolean(actionData?.fieldErrors?.password)}
-          aria-errormessage={actionData?.fieldErrors?.password ? "password-error" : undefined}
-        />
-        {actionData?.fieldErrors?.password ? (
-          <p className="form-validation-error" id="password-error" role="alert">
-            {actionData.fieldErrors.password}
-          </p>
-        ) : null}
-      </div>
+      <Input
+        attr={['name']}
+        defaultValue={user.name}
+        errorMessage={actionData?.fieldErrors?.name}
+        label="Nome"
+        required={true}
+        type="text"
+      />
+      <Input
+        attr={['username']}
+        defaultValue={user.username}
+        errorMessage={actionData?.fieldErrors?.username}
+        label="Nome de usuário"
+        required={true}
+        type="text"
+      />
+      <Input
+        attr={['password']}
+        errorMessage={actionData?.fieldErrors?.password}
+        label="Senha"
+        required={true}
+        type="password"
+      />
       {actionData?.formError ? (
         <p className="form-validation-error" role="alert">
           {actionData.formError}
