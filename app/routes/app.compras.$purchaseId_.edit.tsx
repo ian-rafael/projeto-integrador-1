@@ -53,7 +53,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { supplier };
   const fieldErrors = {
-    supplier: false ? "" : undefined,
+    supplier: supplier.length < 1 ? "Fornecedor é obrigatório" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({

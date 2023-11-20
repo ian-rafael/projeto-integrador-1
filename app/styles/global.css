@@ -50,6 +50,8 @@
   --text-color: var(--gray-12);
   --text-size: 16px;
   --separator: var(--bronze-6);
+
+  --text-tiny: 12px;
 }
 
 *,
@@ -86,6 +88,11 @@ a:hover {
   margin-bottom: 8px;
 }
 
+.form-element-container > .input-wrapper {
+  display: flex;
+  gap: 1px;
+}
+
 .form-element-container input,
 .form-element-container select {
   width: 100%;
@@ -99,6 +106,11 @@ a:hover {
   font-family: 'Inter', sans-serif;
   padding: var(--element-padding);
   font-size: var(--text-size);
+}
+
+.form-element-container > .form-validation-error {
+  font-size: var(--text-tiny);
+  color: red;
 }
 
 button[type="submit"] {

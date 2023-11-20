@@ -5,6 +5,7 @@ import { Input, Textarea } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateCurrency } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -49,10 +50,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { name, code, price, description };
   const fieldErrors = {
-    name: false ? "" : undefined,
-    code: false ? "" : undefined,
-    price: false ? "" : undefined,
-    description: false ? "" : undefined,
+    name: name.length < 1 ? "Nome é obrigatório" : undefined,
+    code: code.length < 1 ? "Código é obrigatório" : undefined,
+    price: price.length < 1 ? "Preço é obrigatório" : validateCurrency(price, "Preço"),
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -103,7 +103,6 @@ export default function ProductEdit () {
       />
       <Textarea
         attr={['description']}
-        errorMessage={actionData?.fieldErrors?.description}
         label="Descrição"
         rows={4}
         defaultValue={product.description || ""}

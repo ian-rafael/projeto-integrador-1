@@ -2,10 +2,11 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Address, { type AddressType } from "~/components/address";
-import { Input } from "~/components/form";
+import { CpfInput, Input, PhoneInput } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateCEP, validateCPF, validateEmail, validatePhone } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -60,11 +61,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { name, cpf, email, phone };
   const fieldErrors = {
-    name: false ? "" : undefined,
-    cpf: false ? "" : undefined,
-    email: false ? "" : undefined,
-    phone: false ? "" : undefined,
-    zipcode: false ? "" : undefined,
+    name: name.length < 1 ? "Nome é obrigatório" : undefined,
+    cpf: validateCPF(cpf),
+    email: validateEmail(email),
+    phone: validatePhone(phone),
+    zipcode: zipcode.length < 1 ? undefined : validateCEP(zipcode),
     state: false ? "" : undefined,
     city: false ? "" : undefined,
     street: false ? "" : undefined,
@@ -108,21 +109,19 @@ export default function CustomerEdit () {
         required={true}
         type="email"
       />
-      <Input
+      <CpfInput
         attr={['cpf']}
         defaultValue={customer.cpf}
         errorMessage={actionData?.fieldErrors?.cpf}
-        label="CPF"
         required={true}
-        type="text"
+        label="CPF"
       />
-      <Input
+      <PhoneInput
         attr={['phone']}
         defaultValue={customer.phone}
         errorMessage={actionData?.fieldErrors?.phone}
         label="Telefone"
         required={true}
-        type="text"
       />
       <Address
         defaultValues={customer.address}

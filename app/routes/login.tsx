@@ -27,8 +27,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { username, password };
   const fieldErrors = {
-    username: false ? "" : undefined,
-    password: false ? "" : undefined,
+    username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
+    password: password.length < 1 ? "Senha é obrigatório" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
