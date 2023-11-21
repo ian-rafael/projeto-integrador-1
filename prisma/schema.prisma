@@ -54,6 +54,8 @@ model Product {
   price       Float
   description String?
 
+  purchaseItems ProductPurchase[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -61,9 +63,23 @@ model Product {
 model Purchase {
   id String @id @default(uuid())
 
-  supplier   Supplier @relation(fields: [supplierId], references: [id])
-  supplierId String
+  supplier     Supplier          @relation(fields: [supplierId], references: [id])
+  supplierId   String
+  productItems ProductPurchase[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ProductPurchase {
+  quantity        Int
+  receivedQuantity Int   @default(0)
+  unitPrice       Float
+
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  purchaseId String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+
+  @@id([purchaseId, productId])
 }

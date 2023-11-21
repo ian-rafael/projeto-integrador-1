@@ -82,10 +82,28 @@ a:hover {
   text-decoration: underline;
 }
 
-.form-element-container {
+.row {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.col {
+  flex: 1;
+}
+
+/*
+ * FORM
+ */
+
+form {
+  --form-element-height: 40px;
+  --form-text-size: var(--text-size);
+  --form-element-padding: var(--element-padding);
+  --form-element-margin: 8px;
+}
+
+.form-element-container {
+  margin-bottom: var(--form-element-margin);
 }
 
 .form-element-container > .input-wrapper {
@@ -94,18 +112,13 @@ a:hover {
 }
 
 .form-element-container input,
+.form-element-container textarea,
 .form-element-container select {
   width: 100%;
   font-family: 'Inter', sans-serif;
-  height: 40px;
-  padding: var(--element-padding);
-  font-size: var(--text-size);
-}
-
-.form-element-container textarea {
-  font-family: 'Inter', sans-serif;
-  padding: var(--element-padding);
-  font-size: var(--text-size);
+  min-height: var(--form-element-height);
+  padding: var(--form-element-padding);
+  font-size: var(--form-text-size);
 }
 
 .form-element-container > .form-validation-error {
@@ -113,22 +126,64 @@ a:hover {
   color: red;
 }
 
-button[type="submit"] {
-  font-family: 'Inter', sans-serif;
-  font-size: var(--text-size);
-  padding: 4px 12px;
-}
-
-fieldset {
-  padding: var(--element-padding);
-  margin-bottom: 8px;
-}
-
-.row {
+.form-array > .form-array-item {
   display: flex;
   gap: 8px;
 }
 
-.col {
+.form-array > .form-array-item:not(:first-child) label {
+  display: none;
+}
+
+.form-array > .form-array-item > .form-array-item-content {
   flex: 1;
+}
+
+.form-array > .form-array-item > .remove-button {
+  height: var(--form-element-height);
+  margin-bottom: var(--form-element-margin);
+  padding: 0 2px;
+  font-size: var(--form-text-size);
+}
+
+.form-array > .form-array-item:first-child > .remove-button {
+  align-self: flex-end;
+}
+
+.form-array > .add-button {
+  width: 100%;
+  font-size: var(--form-text-size);
+}
+
+button[type="submit"] {
+  font-family: 'Inter', sans-serif;
+  font-size: var(--form-text-size);
+  padding: 0 12px;
+  height: var(--form-element-height);
+}
+
+fieldset {
+  padding: var(--element-padding);
+  margin-bottom: var(--form-element-margin);
+}
+
+/*
+ * TABLE
+ */
+
+table form {
+  --form-element-height: 20px;
+  --form-text-size: 12px;
+  --form-element-padding: 4px;
+  --form-element-margin: 0px;
+
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+}
+
+table form input {
+  width: 60px;
+  padding: 4px
 }

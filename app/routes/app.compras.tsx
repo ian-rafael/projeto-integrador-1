@@ -12,6 +12,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       createdAt: true,
       supplier: { select: { name: true } },
     },
+    orderBy: {
+      createdAt: "desc",
+    }
   });
   return json({
     purchases: purchases.map(({id, createdAt, supplier}) => ({

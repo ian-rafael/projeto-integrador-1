@@ -36,6 +36,11 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: Option[];
 }
 
+interface FormArrayProps {
+  children: (i: number) => React.ReactNode;
+  defaultLength?: number;
+}
+
 function resolveInputAttr (attr: string[]) {
   const id = attr.join('_');
   const name = attr.reduce((acc, v) => `${acc}[${v}]`);
@@ -206,5 +211,51 @@ export function PhoneInput ({defaultValue, ...rest}: Omit<InputProps, "type" | "
       type="text"
       value={value}
     />
+  );
+}
+
+function getArrayItems (length: number) {
+  return Array.from(Array(length).keys());
+}
+
+export function FormArray ({ children, defaultLength = 0 }: FormArrayProps) {
+  const min = defaultLength;
+  const [items, setItems] = useState<number[]>(getArrayItems(defaultLength));
+
+  const addItem = () => setItems(items.concat(Date.now()));
+
+  const removeItem = (i: number) => {
+    if (items.length === min) return;
+    const newItems = [...items];
+    newItems.splice(i, 1);
+    setItems(newItems);
+  };
+
+  return (
+    <div className="form-array form-element-container">
+      {items.map((k, i) => (
+        <div key={k} className="form-array-item">
+          <div className="form-array-item-content">
+            {children(i)}
+          </div>
+          {items.length === min ? null : (
+            <button
+              className="remove-button"
+              onClick={() => removeItem(i)}
+              type="button"
+            >
+              &#215;
+            </button>
+          )}
+        </div>
+      ))}
+      <button
+        className="add-button"
+        onClick={addItem}
+        type="button"
+      >
+        +
+      </button>
+    </div>
   );
 }

@@ -116,11 +116,11 @@ main > .index > .action .view-item {
   margin-bottom: 8px;
 }
 
-main > .index > .action .view-item > b {
+main > .index > .action .view-item b {
   font-size: 12px;
 }
 
-main > .index > .action .view-item > span {
+main > .index > .action .view-item span {
   font-weight: 400;
 }
 
@@ -129,4 +129,30 @@ main > .index > .action .view-actions {
   align-items: center;
   gap: 16px;
   margin-top: 16px;
+}
+
+main > .index > .action table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+main > .index > .action table th {
+  font-size: 12px;
+}
+
+main > .index > .action table td {
+  padding: 8px 0px;
+}
+
+main > .index > .action table tr:nth-child(2n - 1) td {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+main > .index > .action table th:first-child {
+  text-align: left;
+}
+
+main > .index > .action table td:not(:first-child) {
+  text-align: center;
 }

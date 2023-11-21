@@ -1,0 +1,80 @@
+import { json, type ActionFunctionArgs } from "@remix-run/node";
+import { useFetcher } from "@remix-run/react";
+import { useEffect, useRef } from "react";
+import invariant from "tiny-invariant";
+import { db } from "~/utils/db.server";
+import { badRequest } from "~/utils/request.server";
+import { requireUserId } from "~/utils/session.server";
+
+export const action = async ({ request, params }: ActionFunctionArgs) => {
+  await requireUserId(request);
+
+  invariant(params.purchaseId, "params.purchaseId is required");
+  invariant(params.productId, "params.productId is required");
+
+  const form = await request.formData();
+  const quantity = form.get("quantity");
+
+  if (
+    typeof quantity !== "string"
+    || Number.isNaN(+quantity)
+  ) {
+    return badRequest({ error: "Form submitted incorrectly" });
+  }
+
+  const record = await db.productPurchase.findUnique({
+    where: {
+      purchaseId_productId: {
+        purchaseId: params.purchaseId,
+        productId: params.productId,
+      },
+    },
+  });
+
+  if (!record) {
+    return json({error: "Record not found"}, { status: 404 });
+  }
+
+  if (parseInt(quantity) > (record.quantity - record.receivedQuantity)) {
+    return badRequest({ error: "Quantidade maior que o permitido" });
+  }
+
+  await db.productPurchase.update({
+    where: {
+      purchaseId_productId: {
+        productId: params.productId,
+        purchaseId: params.purchaseId,
+      },
+    },
+    data: {
+      receivedQuantity: {
+        increment: parseInt(quantity),
+      }
+    },
+  });
+
+  return json({ ok: true });
+};
+
+export function ProductItemReceiveForm ({purchaseId, productId, maxQuantity}: {purchaseId: string, productId: string, maxQuantity: number}) {
+  const fetcher = useFetcher<typeof action>();
+  const isUpdating = fetcher.state !== "idle";
+  const isSubmitting = fetcher.state === "submitting";
+  const actionUrl = "/app/compras/" + purchaseId + "/receive-item/" + productId;
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (isSubmitting) {
+      formRef.current?.reset();
+    }
+  }, [isSubmitting]);
+
+  return (
+    <fetcher.Form action={actionUrl} className="tiny-form" method="post" ref={formRef}>
+      <input name="quantity" type="number" required={true} min={0} max={maxQuantity} autoComplete="off"/>
+      <button disabled={isUpdating} type="submit">
+        Add
+      </button>
+    </fetcher.Form>
+  );
+}

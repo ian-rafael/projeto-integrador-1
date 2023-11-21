@@ -1,7 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import { Input, Select } from "~/components/form";
+import { Select } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -84,36 +84,6 @@ export default function PurchaseEdit () {
         options={supplierOptions}
         required={true}
       />
-      <div className="row">
-        <div className="column">
-          <Input
-            attr={['product']}
-            type="text"
-            label="Cód. do produto"
-            required={true}
-          />
-        </div>
-        <div className="column">
-          <Input
-            attr={['quantity']}
-            defaultValue={1}
-            label="Quantidade"
-            min={1}
-            required={true}
-            type="number"
-          />
-        </div>
-        <div className="column">
-          <Input
-            attr={['unit_price']}
-            label="Preço unitário"
-            min={0}
-            required={true}
-            step=".01"
-            type="number"
-          />
-        </div>
-      </div>
       {actionData?.formError ? (
         <p className="form-validation-error" role="alert">
           {actionData.formError}
