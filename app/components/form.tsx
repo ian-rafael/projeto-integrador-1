@@ -1,14 +1,17 @@
+import { Combobox } from "@headlessui/react";
+import { useFetcher } from "@remix-run/react";
 import cep, { type CEP } from "cep-promise";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { maskCEP, maskCNPJ, maskCPF, maskPhone } from "~/utils/masks";
 import { validateCEP } from "~/utils/validators";
 
 interface ContainerProps {
-  errorId: string;
-  errorMessage?: string;
-  label: string;
-  htmlFor: string;
+  className?: string,
   children: React.ReactNode;
+  errorId?: string;
+  errorMessage?: string;
+  htmlFor?: string;
+  label?: string;
 }
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -48,9 +51,16 @@ function resolveInputAttr (attr: string[]) {
   return {id, name, htmlFor: id, errorId};
 }
 
-function Container ({ children, errorMessage, errorId, htmlFor, label }: ContainerProps) {
+function Container ({
+  className,
+  children,
+  errorMessage,
+  errorId,
+  htmlFor,
+  label,
+}: ContainerProps) {
   return (
-    <div className="form-element-container">
+    <div className={"form-element-container " + className}>
       {label && <label htmlFor={htmlFor}>{label}</label>}
       {children}
       {errorMessage ? (
@@ -257,5 +267,73 @@ export function FormArray ({ children, defaultLength = 0 }: FormArrayProps) {
         +
       </button>
     </div>
+  );
+}
+
+type ComboBoxProps = {
+  attr: string[];
+  defaultValue?: Option;
+  errorMessage?: string;
+  label: string;
+  required?: boolean;
+  url: string;
+};
+
+export function ComboBox ({
+  attr,
+  defaultValue,
+  errorMessage,
+  label,
+  required,
+  url,
+}: ComboBoxProps) {
+  const fetcher = useFetcher<Option[]>();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const {name, errorId} = resolveInputAttr(attr);
+
+  const load = (term: string) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      fetcher.load(url + "?term=" + term);
+    }, 500);
+  };
+
+  useEffect(() => {
+    load('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (    
+    <Combobox
+      as={Container}
+      className="combobox"
+      defaultValue={defaultValue}
+      errorId={errorId}
+      errorMessage={errorMessage}
+      name={name}
+    >
+      <Combobox.Label>{label} 🔍</Combobox.Label>
+      <div className="input-wrapper">
+        <Combobox.Input
+          aria-errormessage={errorMessage ? errorId : undefined}
+          aria-invalid={Boolean(errorMessage)}
+          autoComplete="off"
+          displayValue={(option: Option) => option ? option.label : ''}
+          onBlur={() => load('')}
+          onChange={(e) => load(e.target.value)}
+          required={required}
+        />
+        <Combobox.Button>🔽</Combobox.Button>
+      </div>
+      <Combobox.Options>
+        {fetcher.data?.map((option) => (
+          <Combobox.Option key={option.id} value={option}>
+            {option.label}
+          </Combobox.Option>
+        ))}
+      </Combobox.Options>
+    </Combobox>
   );
 }

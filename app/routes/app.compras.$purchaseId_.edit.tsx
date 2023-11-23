@@ -1,7 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import { Select } from "~/components/form";
+import { ComboBox } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -12,25 +12,15 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.purchaseId, "params.purchaseId is required");
 
   const purchase = await db.purchase.findUnique({
-    select: { supplierId: true },
+    select: { supplier: { select: { id: true, name: true } } },
     where: { id: params.purchaseId },
-  });
-
-  const suppliers = await db.supplier.findMany({
-    select: { id: true, name: true },
   });
 
   if (!purchase) {
     throw json("Purchase not found", { status: 404 });
   }
 
-  return json({
-    purchase,
-    supplierOptions: suppliers.map(({id, name}) => ({
-      id,
-      label: name,
-    })),
-  });
+  return json({ purchase });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -39,10 +29,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   invariant(params.purchaseId, "params.purchaseId is required");
 
   const form = await request.formData();
-  const supplier = form.get("supplier");
+  const supplierId = form.get("supplier[id]");
 
   if (
-    typeof supplier !== "string"
+    typeof supplierId !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -51,9 +41,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     });
   }
 
-  const fields = { supplier };
+  const fields = { supplier: supplierId };
   const fieldErrors = {
-    supplier: supplier.length < 1 ? "Fornecedor é obrigatório" : undefined,
+    supplier: supplierId.length < 1 ? "Fornecedor é obrigatório" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -65,23 +55,23 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const purchase = await db.purchase.update({
     where: { id: params.purchaseId },
-    data: { supplierId: supplier },
+    data: { supplierId },
   });
 
   return redirect("/app/compras/" + purchase.id);
 };
 
 export default function PurchaseEdit () {
-  const { purchase, supplierOptions } = useLoaderData<typeof loader>();
+  const { purchase } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
-      <Select
+      <ComboBox
         attr={['supplier']}
-        defaultValue={purchase.supplierId}
+        defaultValue={{id: purchase.supplier.id, label: purchase.supplier.name}}
         errorMessage={actionData?.fieldErrors?.supplier}
+        url="/app/fornecedores-search"
         label="Fornecedor"
-        options={supplierOptions}
         required={true}
       />
       {actionData?.formError ? (

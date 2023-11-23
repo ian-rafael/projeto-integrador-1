@@ -1,45 +1,21 @@
-import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs, json } from "@remix-run/node";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { FormArray, Input, Select } from "~/components/form";
+import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+import { Form, useActionData } from "@remix-run/react";
+import { ComboBox, FormArray, Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requireUserId(request);
-
-  const [suppliers, products] = await Promise.all([
-    db.supplier.findMany({
-      select: { id: true, name: true },
-    }),
-    db.product.findMany({
-      select: { id: true, name: true },
-    })
-  ]);
-
-  return json({
-    supplierOptions: suppliers.map(({id, name}) => ({
-      id,
-      label: name,
-    })),
-    productOptions: products.map(({id, name}) => ({
-      id,
-      label: name,
-    })),
-  });
-};
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
 
   const form = await request.formData();
-  const supplier = form.get("supplier");
-  const products = form.getAll("product");
+  const supplierId = form.get("supplier[id]");
+  const products = form.getAll("product[id]");
   const quantities = form.getAll("quantity");
   const unitPrices = form.getAll("unitPrice");
 
   if (
-    typeof supplier !== "string"
+    typeof supplierId !== "string"
     || products.length === 0
     || quantities.length !== products.length
     || unitPrices.length !== products.length
@@ -51,9 +27,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-  const fields = { supplier };
+  const fields = { supplier: supplierId };
   const fieldErrors = {
-    supplier: supplier.length < 1 ? "Fornecedor é obrigatório" : undefined,
+    supplier: supplierId.length < 1 ? "Fornecedor é obrigatório" : undefined,
     products: products.map((value, i) => products.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
   };
   if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
@@ -66,12 +42,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const purchase = await db.purchase.create({
     data: {
-      supplierId: supplier,
+      supplierId,
       productItems: {
         createMany: {
           data: products.map((productId, i) => ({
             productId: String(productId),
-            quantity: Number(quantities[i]),
+            quantity: parseInt(String(quantities[i])),
             unitPrice: Number(unitPrices[i]),
           })),
         },
@@ -83,28 +59,26 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function PurchaseCreate () {
-  const {supplierOptions, productOptions} = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
-      <Select
+      <ComboBox
         attr={['supplier']}
-        defaultValue={actionData?.fields?.supplier}
         errorMessage={actionData?.fieldErrors?.supplier}
         label="Fornecedor"
-        options={supplierOptions}
         required={true}
+        url="/app/fornecedores-search"
       />
       <FormArray defaultLength={1}>
         {(i) => (
           <div className="row">
             <div className="col">
-              <Select
+              <ComboBox
                 attr={['product']}
-                label="Produto"
                 errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-                options={productOptions}
+                label="Produto"
                 required={true}
+                url="/app/produtos-search"
               />
             </div>
             <div className="col">
