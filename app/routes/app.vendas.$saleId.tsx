@@ -111,7 +111,7 @@ export default function SaleView () {
   return (
     <div>
       <div className="view-item">
-        <b>Fornecedor: </b>
+        <b>Cliente: </b>
         <span>{sale.customerName}</span>
       </div>
       <div className="view-item">
