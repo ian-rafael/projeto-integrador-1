@@ -127,7 +127,7 @@ export default function SaleCreate () {
             defaultValue={new Date().toISOString().split('T')[0]}
             errorMessage={actionData?.fieldErrors?.dueDate}
             required={true}
-            label="Data do primeiro pagamento"
+            label="Data do primeiro vencimento"
             type="date"
           />
         </div>
