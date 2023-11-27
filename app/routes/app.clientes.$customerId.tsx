@@ -9,7 +9,7 @@ import { requireUserId } from "~/utils/session.server";
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.customerId, "params.userId is required");
+  invariant(params.customerId, "params.customerId is required");
 
   const customer = await db.customer.findUnique({
     select: { name: true, email: true, cpf: true, phone: true, createdAt: true, address: true },

@@ -49,7 +49,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     data: {
       receivedQuantity: {
         increment: parseInt(quantity),
-      }
+      },
+      product: {
+        update: {
+          stock: {
+            increment: parseInt(quantity),
+          },
+        },
+      },
     },
   });
 
@@ -70,7 +77,7 @@ export function ProductItemReceiveForm ({purchaseId, productId, maxQuantity}: {p
   }, [isSubmitting]);
 
   return (
-    <fetcher.Form action={actionUrl} className="tiny-form" method="post" ref={formRef}>
+    <fetcher.Form action={actionUrl} method="post" ref={formRef}>
       <input name="quantity" type="number" required={true} min={0} max={maxQuantity} autoComplete="off"/>
       <button disabled={isUpdating} type="submit">
         Add

@@ -11,7 +11,14 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.productId, "params.productId is required");
 
   const product = await db.product.findUnique({
-    select: { name: true, code: true, price: true, description: true, createdAt: true },
+    select: {
+      code: true,
+      createdAt: true,
+      description: true,
+      name: true,
+      price: true,
+      stock: true,
+    },
     where: { id: params.productId },
   });
 
@@ -55,6 +62,10 @@ export default function ProductView () {
       <div className="view-item">
         <b>Preço: </b>
         <span>{product.price}</span>
+      </div>
+      <div className="view-item">
+        <b>Estoque: </b>
+        <span>{product.stock}</span>
       </div>
       <div className="view-item">
         <b>Descrição: </b>

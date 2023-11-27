@@ -29,6 +29,8 @@ model Customer {
   phone   String
   address Json
 
+  sales Sale[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -53,8 +55,10 @@ model Product {
   code        String
   price       Float
   description String?
+  stock       Int     @default(0)
 
   purchaseItems ProductPurchase[]
+  saleItems     ProductSale[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,9 +76,9 @@ model Purchase {
 }
 
 model ProductPurchase {
-  quantity        Int
+  quantity         Int
   receivedQuantity Int   @default(0)
-  unitPrice       Float
+  unitPrice        Float
 
   purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
   purchaseId String
@@ -82,4 +86,45 @@ model ProductPurchase {
   productId  String
 
   @@id([purchaseId, productId])
+}
+
+model Sale {
+  id String @id @default(uuid())
+
+  customer     Customer          @relation(fields: [customerId], references: [id])
+  customerId   String
+  productItems ProductSale[]
+  installments SaleInstallment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductSale {
+  quantity  Int
+  unitPrice Float
+
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId    String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  @@id([saleId, productId])
+}
+
+model SaleInstallment {
+  id          String    @id @default(uuid())
+  value       Float
+  dueDate     DateTime
+  paymentDate DateTime?
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  status StatusParcela @default(PENDENTE)
+}
+
+enum StatusParcela {
+  PAGO
+  PENDENTE
 }

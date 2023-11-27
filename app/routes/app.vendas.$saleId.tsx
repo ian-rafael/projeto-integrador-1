@@ -4,49 +4,51 @@ import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-import { ProductItemDeleteButton } from "./app.compras.$purchaseId.delete-item.$productId";
-import { ProductItemReceiveForm } from "./app.compras.$purchaseId.receive-item.$productId";
 import { useEffect } from "react";
+import { $Enums } from "@prisma/client";
+import { SaleInstallmentPaymentForm } from "./app.vendas.$saleId.receive-installment.$installmentId";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.purchaseId, "params.purchaseId is required");
+  invariant(params.saleId, "params.saleId is required");
 
-  const purchase = await db.purchase.findUnique({
+  const sale = await db.sale.findUnique({
     select: {
       createdAt: true,
-      supplier: { select: { name: true } },
+      customer: { select: { name: true } },
       id: true,
       productItems: {
         select: {
           product: { select: { name: true } },
           productId: true,
           quantity: true,
-          receivedQuantity: true,
           unitPrice: true,
         }
+      },
+      installments: {
+        orderBy: { dueDate: "asc" },
       }
     },
-    where: { id: params.purchaseId },
+    where: { id: params.saleId },
   });
 
-  if (!purchase) {
-    throw json("Purchase not found", { status: 404 });
+  if (!sale) {
+    throw json("Sale not found", { status: 404 });
   }
 
   return json({
-    purchase: {
-      id: purchase.id,
-      createdAt: purchase.createdAt,
-      supplierName: purchase.supplier.name,
-      productItems: purchase.productItems.map((data) => ({
+    sale: {
+      id: sale.id,
+      createdAt: sale.createdAt,
+      customerName: sale.customer.name,
+      installments: sale.installments,
+      productItems: sale.productItems.map((data) => ({
         productName: data.product.name,
         productId: data.productId,
         quantity: data.quantity,
-        receivedQuantity: data.receivedQuantity,
         unitPrice: data.unitPrice,
-      }))
+      })),
     },
   });
 };
@@ -54,43 +56,51 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.purchaseId, "params.purchaseId is required");
+  invariant(params.saleId, "params.saleId is required");
 
   const form = await request.formData();
   const intent = form.get("intent");
   if (intent === "delete") {
-    const count = await db.productPurchase.count({
+    const count = await db.saleInstallment.count({
       where: {
-        purchaseId: params.purchaseId,
-        AND: [
-          {
-            receivedQuantity: {
-              gte: 1,
-            },
-          },
-        ],
+        saleId: params.saleId,
+        AND: [{ status: $Enums.StatusParcela.PAGO }],
       },
     });
 
     if (count > 0) {
       return badRequest({
-        formError: "Erro ao deletar: Esse registro possui itens recebidos",
+        formError: "Erro ao deletar: Esse registro possui parcelas pagas",
       });
     }
 
-    await db.purchase.delete({
-      where: { id: params.purchaseId },
+    const productItems = await db.productSale.findMany({
+      where: { saleId: params.saleId },
     });
-    return redirect("/app/compras");
+
+    for (let i = 0; i < productItems.length; i++) {
+      const id = productItems[i].productId;
+      const increment = productItems[i].quantity;
+      await db.product.update({
+        data: { stock: {increment} },
+        where: { id },
+      });
+    }
+
+    await db.sale.delete({
+      where: { id: params.saleId },
+    });
+    return redirect("/app/vendas");
   }
+
   return badRequest({
     formError: "Erro: Intent precisa ser 'delete'",
   });
 };
 
-export default function PurchaseView () {
+export default function SaleView () {
   const actionData = useActionData<typeof action>();
-  const {purchase} = useLoaderData<typeof loader>();
+  const {sale} = useLoaderData<typeof loader>();
 
   useEffect(() => {
     if (actionData?.formError) {
@@ -102,14 +112,14 @@ export default function PurchaseView () {
     <div>
       <div className="view-item">
         <b>Fornecedor: </b>
-        <span>{purchase.supplierName}</span>
+        <span>{sale.customerName}</span>
       </div>
       <div className="view-item">
         <b>Criado em: </b>
         <span>
-          {new Date(purchase.createdAt).toLocaleDateString("pt-BR")}
+          {new Date(sale.createdAt).toLocaleDateString("pt-BR")}
           {', '}
-          {new Date(purchase.createdAt).toLocaleTimeString("pt-BR")}
+          {new Date(sale.createdAt).toLocaleTimeString("pt-BR")}
         </span>
       </div>
       <table>
@@ -117,39 +127,42 @@ export default function PurchaseView () {
           <tr>
             <th>Produto</th>
             <th>Quantidade</th>
-            <th>Recebido</th>
             <th>Preço unitário</th>
-            <th>Receber</th>
-            <th>Deletar</th>
           </tr>
         </thead>
         <tbody>
-          {purchase.productItems.map((data) => {
-            const maxQuantity = data.quantity - data.receivedQuantity;
-            const canDelete = data.receivedQuantity === 0;
+          {sale.productItems.map((data) => {
             return (
               <tr key={data.productId}>
                 <td>{data.productName}</td>
                 <td>{data.quantity}</td>
-                <td>{data.receivedQuantity}</td>
                 <td>{data.unitPrice}</td>
-                <td>
-                  {maxQuantity > 0 ? (
-                    <ProductItemReceiveForm
-                      productId={data.productId}
-                      purchaseId={purchase.id}
-                      maxQuantity={maxQuantity}
-                    />
-                  ) : null}
-                </td>
-                <td>
-                  {canDelete ? (
-                    <ProductItemDeleteButton
-                      productId={data.productId}
-                      purchaseId={purchase.id}
-                    />
-                  ) : null}
-                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Parcela</th>
+            <th>Data de vencimento</th>
+            <th>Valor</th>
+            <th>Pago</th>
+            <th>Data de pagamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sale.installments.map((data, i) => {
+            return (
+              <tr key={data.id}>
+                <td>{i + 1}ª</td>
+                <td>{new Date(data.dueDate).toLocaleDateString("pt-BR")}</td>
+                <td>{data.value.toFixed(2)}</td>
+                <td>{data.status === $Enums.StatusParcela.PAGO ? "✅" : "❌"}</td>
+                <td>{data.paymentDate ? new Date(data.paymentDate).toLocaleDateString("pt-BR") : (
+                  <SaleInstallmentPaymentForm installmentId={data.id} saleId={sale.id}/>
+                )}</td>
               </tr>
             );
           })}
