@@ -52,7 +52,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const fieldErrors = {
     name: name.length < 1 ? "Nome é obrigatório" : undefined,
     username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
-    password: password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    password: password && password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
     repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
@@ -102,7 +102,6 @@ export default function UserEdit () {
         errorMessage={actionData?.fieldErrors?.password}
         label="Senha"
         minLength={8}
-        required={true}
         type="password"
       />
       <Input
@@ -110,7 +109,6 @@ export default function UserEdit () {
         errorMessage={actionData?.fieldErrors?.repeatPassword}
         label="Repita a senha"
         minLength={8}
-        required={true}
         type="password"
       />
       {actionData?.formError ? (

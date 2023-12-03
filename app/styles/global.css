@@ -129,7 +129,7 @@ form {
   border-radius: 3px;
 }
 
-.form-element-container > .form-validation-error {
+.form-validation-error {
   font-size: var(--text-tiny);
   color: red;
 }
