@@ -7,6 +7,7 @@ import { requireUserId } from "~/utils/session.server";
 import { ProductItemDeleteButton } from "./app.compras.$purchaseId.delete-item.$productId";
 import { ProductItemReceiveForm } from "./app.compras.$purchaseId.receive-item.$productId";
 import { useEffect } from "react";
+import { formatCurrency } from "~/utils/formatters";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -132,7 +133,7 @@ export default function PurchaseView () {
                 <td>{data.productName}</td>
                 <td>{data.quantity}</td>
                 <td>{data.receivedQuantity}</td>
-                <td>{data.unitPrice}</td>
+                <td>{formatCurrency(data.unitPrice)}</td>
                 <td>
                   {maxQuantity > 0 ? (
                     <ProductItemReceiveForm

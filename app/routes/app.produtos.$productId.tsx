@@ -2,6 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
+import { formatCurrency } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 
@@ -61,7 +62,7 @@ export default function ProductView () {
       </div>
       <div className="view-item">
         <b>Preço: </b>
-        <span>{product.price}</span>
+        <span>{formatCurrency(product.price)}</span>
       </div>
       <div className="view-item">
         <b>Estoque: </b>

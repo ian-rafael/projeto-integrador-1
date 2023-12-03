@@ -7,6 +7,7 @@ import { requireUserId } from "~/utils/session.server";
 import { useEffect } from "react";
 import { $Enums } from "@prisma/client";
 import { SaleInstallmentPaymentForm } from "./app.vendas.$saleId.receive-installment.$installmentId";
+import { formatCurrency, formatDate } from "~/utils/formatters";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -136,7 +137,7 @@ export default function SaleView () {
               <tr key={data.productId}>
                 <td>{data.productName}</td>
                 <td>{data.quantity}</td>
-                <td>{data.unitPrice}</td>
+                <td>{formatCurrency(data.unitPrice)}</td>
               </tr>
             );
           })}
@@ -157,10 +158,10 @@ export default function SaleView () {
             return (
               <tr key={data.id}>
                 <td>{i + 1}ª</td>
-                <td>{new Date(data.dueDate).toLocaleDateString("pt-BR")}</td>
-                <td>{data.value.toFixed(2)}</td>
+                <td>{formatDate(data.dueDate)}</td>
+                <td>{formatCurrency(data.value)}</td>
                 <td>{data.status === $Enums.StatusParcela.PAGO ? "✅" : "❌"}</td>
-                <td>{data.paymentDate ? new Date(data.paymentDate).toLocaleDateString("pt-BR") : (
+                <td>{data.paymentDate ? formatDate(data.paymentDate) : (
                   <SaleInstallmentPaymentForm installmentId={data.id} saleId={sale.id}/>
                 )}</td>
               </tr>

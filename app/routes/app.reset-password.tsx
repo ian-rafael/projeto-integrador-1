@@ -1,6 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
+import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -10,11 +11,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const form = await request.formData();
   const password = form.get("password");
-  const repeatPassword = form.get("repeat-password");
+  const repeatPassword = form.get("repeat_password");
 
   if (
     typeof password !== "string"
-    || typeof password !== "string"
+    || typeof repeatPassword !== "string"
   ) {
     return badRequest({
       fieldErrors: null,
@@ -48,38 +49,22 @@ export default function ResetPassword () {
     <div className="reset-password">
       <Form method="post">
         <h2>Escolha uma nova senha</h2>
-        <div className="form-element-container">
-          <label htmlFor="password-input">Nova senha</label>
-          <input
-            id="password-input"
-            name="password"
-            type="password"
-            required={true}
-            aria-invalid={Boolean(actionData?.fieldErrors?.password)}
-            aria-errormessage={actionData?.fieldErrors?.password ? "password-error" : undefined}
-          />
-          {actionData?.fieldErrors?.password ? (
-            <p className="form-validation-error" id="password-error" role="alert">
-              {actionData.fieldErrors.password}
-            </p>
-          ) : null}
-        </div>
-        <div className="form-element-container">
-          <label htmlFor="repeat-password-input">Repita a senha:</label>
-          <input
-            id="repeat-password-input"
-            name="repeat-password"
-            type="password"
-            required={true}
-            aria-invalid={Boolean(actionData?.fieldErrors?.repeatPassword)}
-            aria-errormessage={actionData?.fieldErrors?.repeatPassword ? "repeat-password-error" : undefined}
-          />
-          {actionData?.fieldErrors?.repeatPassword ? (
-            <p className="form-validation-error" id="repeat-password-error" role="alert">
-              {actionData.fieldErrors.repeatPassword}
-            </p>
-          ) : null}
-        </div>
+        <Input
+          attr={['password']}
+          errorMessage={actionData?.fieldErrors?.password}
+          label="Senha"
+          minLength={8}
+          required={true}
+          type="password"
+        />
+        <Input
+          attr={['repeat_password']}
+          errorMessage={actionData?.fieldErrors?.repeatPassword}
+          label="Repita a senha"
+          minLength={8}
+          required={true}
+          type="password"
+        />
         {actionData?.formError ? (
           <p className="form-validation-error" role="alert">{actionData.formError}</p>
         ) : null}

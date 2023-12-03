@@ -13,11 +13,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const name = form.get("name");
   const username = form.get("username");
   const password = form.get("password");
+  const repeatPassword = form.get("repeat_password");
 
   if (
     typeof name !== "string"
     || typeof username !== "string"
     || typeof password !== "string"
+    || typeof repeatPassword !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -31,6 +33,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     name: name.length < 1 ? "Nome é obrigatório" : undefined,
     username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
     password: password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -72,6 +75,15 @@ export default function UserCreate () {
         attr={['password']}
         errorMessage={actionData?.fieldErrors?.password}
         label="Senha"
+        minLength={8}
+        required={true}
+        type="password"
+      />
+      <Input
+        attr={['repeat_password']}
+        errorMessage={actionData?.fieldErrors?.repeatPassword}
+        label="Repita a senha"
+        minLength={8}
         required={true}
         type="password"
       />

@@ -1,6 +1,7 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
+import { formatDate } from "~/utils/formatters";
 import { requireUserId } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -19,7 +20,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({
     sales: purchases.map(({id, createdAt, customer}) => ({
       id,
-      name: new Date(createdAt).toLocaleDateString("pt-BR") + " - " + customer.name,
+      name: formatDate(createdAt) + " - " + customer.name,
     }),
   )});
 };
