@@ -76,7 +76,3 @@ yarn prisma db seed
 ## Requirements
 
 - Node 18
-https://remix.run/docs/en/main/guides/faq#how-can-i-have-structured-data-in-a-form
-fazer duas tabelas
-SaleItem
-PurchaseItem
