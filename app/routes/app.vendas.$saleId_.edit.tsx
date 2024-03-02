@@ -1,7 +1,8 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import { ComboBox } from "~/components/form";
+import { ComboBox, SubmitButton } from "~/components/form";
+import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -12,7 +13,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.saleId, "params.saleId is required");
 
   const sale = await db.sale.findUnique({
-    select: { customer: { select: { id: true, name: true } } },
+    select: { id: true, customer: { select: { id: true, name: true } } },
     where: { id: params.saleId },
   });
 
@@ -67,6 +68,8 @@ export default function SaleEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <Tag title="ID da venda">{sale.id}</Tag>
+      <h3>Edição da venda</h3>
       <ComboBox
         attr={['customer']}
         defaultValue={{id: sale.customer.id, label: sale.customer.name}}
@@ -80,7 +83,7 @@ export default function SaleEdit () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Salvar</button>
+      <SubmitButton>Salvar</SubmitButton>
     </Form>
   );
 }

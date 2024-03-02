@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { ComboBox, FormArray, Input } from "~/components/form";
+import { ComboBox, FormArray, Input, SubmitButton } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -62,6 +62,7 @@ export default function PurchaseCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <h3>Nova compra</h3>
       <ComboBox
         attr={['supplier']}
         errorMessage={actionData?.fieldErrors?.supplier}
@@ -71,36 +72,30 @@ export default function PurchaseCreate () {
       />
       <FormArray defaultLength={1}>
         {(i) => (
-          <div className="row">
-            <div className="col">
-              <ComboBox
-                attr={['product']}
-                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-                label="Produto"
-                required={true}
-                url="/app/produtos-search"
-              />
-            </div>
-            <div className="col">
-              <Input
-                attr={['quantity']}
-                defaultValue={1}
-                label="Quantidade"
-                min={1}
-                required={true}
-                type="number"
-              />
-            </div>
-            <div className="col">
-              <Input
-                attr={['unitPrice']}
-                label="Preço unitário"
-                min={0}
-                required={true}
-                step=".01"
-                type="number"
-              />
-            </div>
+          <div className="grid grid-cols-3 gap-1">
+            <ComboBox
+              attr={['product']}
+              errorMessage={actionData?.fieldErrors?.products[i] || undefined}
+              label="Produto"
+              required={true}
+              url="/app/produtos-search"
+            />
+            <Input
+              attr={['quantity']}
+              defaultValue={1}
+              label="Quantidade"
+              min={1}
+              required={true}
+              type="number"
+            />
+            <Input
+              attr={['unitPrice']}
+              label="Preço unitário"
+              min={0}
+              required={true}
+              step=".01"
+              type="number"
+            />
           </div>
         )}
       </FormArray>
@@ -109,7 +104,7 @@ export default function PurchaseCreate () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Criar</button>
+      <SubmitButton>Criar</SubmitButton>
     </Form>
   );
 }

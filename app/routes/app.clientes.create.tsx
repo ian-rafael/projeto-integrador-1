@@ -1,7 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import Address from "~/components/address";
-import { CpfInput, Input, PhoneInput } from "~/components/form";
+import { CpfInput, Input, PhoneInput, SubmitButton } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -71,6 +71,7 @@ export default function CustomerCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <h3>Novo cliente</h3>
       <Input
         attr={['name']}
         errorMessage={actionData?.fieldErrors?.name}
@@ -111,7 +112,7 @@ export default function CustomerCreate () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Criar</button>
+      <SubmitButton>Criar</SubmitButton>
     </Form>
   );
 }

@@ -1,7 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
-import { Input } from "~/components/form";
+import { Input, SubmitButton } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -55,6 +55,7 @@ export default function UserCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <h3>Novo usuário</h3>
       <Input
         attr={['name']}
         defaultValue={actionData?.fields?.name}
@@ -92,7 +93,7 @@ export default function UserCreate () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Criar</button>
+      <SubmitButton>Criar</SubmitButton>
     </Form>
   );
 }

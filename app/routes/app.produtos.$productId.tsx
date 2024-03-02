@@ -1,8 +1,10 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import Tag from "~/components/tag";
+import { Actions, Item } from "~/components/view";
 import { db } from "~/utils/db.server";
-import { formatCurrency } from "~/utils/formatters";
+import { formatCurrency, formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 
@@ -13,6 +15,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
   const product = await db.product.findUnique({
     select: {
+      id: true,
       code: true,
       createdAt: true,
       description: true,
@@ -52,50 +55,27 @@ export default function ProductView () {
   const { product } = useLoaderData<typeof loader>();
   return (
     <div>
-      <div className="view-item">
-        <b>Nome: </b>
-        <span>{product.name}</span>
-      </div>
-      <div className="view-item">
-        <b>Código: </b>
-        <span>{product.code}</span>
-      </div>
-      <div className="view-item">
-        <b>Preço: </b>
-        <span>{formatCurrency(product.price)}</span>
-      </div>
-      <div className="view-item">
-        <b>Estoque: </b>
-        <span>{product.stock}</span>
-      </div>
-      <div className="view-item">
-        <b>Descrição: </b>
-        <span>{product.description}</span>
-      </div>
-      <div className="view-item">
-        <b>Criado em: </b>
-        <span>
-          {new Date(product.createdAt).toLocaleDateString("pt-BR")}
-          {', '}
-          {new Date(product.createdAt).toLocaleTimeString("pt-BR")}
-        </span>
-      </div>
-      <div className="view-actions">
-        <Link to="edit">Editar</Link>
-        <Form method="post" onSubmit={(event) => {
-          if (
-            !confirm(
-              "Favor, confirme que você quer deletar esse registro."
-            )
-          ) {
-            event.preventDefault();
-          }
-        }}>
-          <button name="intent" value="delete" type="submit">
-            Deletar
-          </button>
-        </Form>
-      </div>
+      <Tag title="ID do produto">{product.id}</Tag>
+      <h3>Produto</h3>
+      <Item title="Nome">
+        {product.name}
+      </Item>
+      <Item title="Código">
+        {product.code}
+      </Item>
+      <Item title="Preço">
+        {formatCurrency(product.price)}
+      </Item>
+      <Item title="Estoque">
+        {product.stock}
+      </Item>
+      <Item title="Descrição">
+        {product.description}
+      </Item>
+      <Item title="Criado">
+        {formatDateHour(product.createdAt)}
+      </Item>
+      <Actions/>
     </div>
   );
 }

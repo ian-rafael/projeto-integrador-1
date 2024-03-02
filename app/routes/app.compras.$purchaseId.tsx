@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -7,7 +7,9 @@ import { requireUserId } from "~/utils/session.server";
 import { ProductItemDeleteButton } from "./app.compras.$purchaseId.delete-item.$productId";
 import { ProductItemReceiveForm } from "./app.compras.$purchaseId.receive-item.$productId";
 import { useEffect } from "react";
-import { formatCurrency } from "~/utils/formatters";
+import { formatDateHour } from "~/utils/formatters";
+import Tag from "~/components/tag";
+import { Actions, Item, List, Table } from "~/components/view";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -101,77 +103,76 @@ export default function PurchaseView () {
 
   return (
     <div>
-      <div className="view-item">
-        <b>Fornecedor: </b>
-        <span>{purchase.supplierName}</span>
-      </div>
-      <div className="view-item">
-        <b>Criado em: </b>
-        <span>
-          {new Date(purchase.createdAt).toLocaleDateString("pt-BR")}
-          {', '}
-          {new Date(purchase.createdAt).toLocaleTimeString("pt-BR")}
-        </span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Recebido</th>
-            <th>Preço unitário</th>
-            <th>Receber</th>
-            <th>Deletar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {purchase.productItems.map((data) => {
-            const maxQuantity = data.quantity - data.receivedQuantity;
-            const canDelete = data.receivedQuantity === 0;
-            return (
-              <tr key={data.productId}>
-                <td>{data.productName}</td>
-                <td>{data.quantity}</td>
-                <td>{data.receivedQuantity}</td>
-                <td>{formatCurrency(data.unitPrice)}</td>
-                <td>
-                  {maxQuantity > 0 ? (
+      <Tag title="ID da compra">{purchase.id}</Tag>
+      <h3>Compra</h3>
+      <List>
+        <Item title="Fornecedor">
+          {purchase.supplierName}
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(purchase.createdAt)}
+        </Item>
+        <Item title="Produtos">
+          <Table
+            cols={[
+              {
+                label: 'Nome',
+                property: 'productName',
+                type: 'text',
+              },
+              {
+                label: 'Qtd.',
+                property: 'quantity',
+                type: 'text',
+              },
+              {
+                label: 'Recebido',
+                property: 'receivedQuantity',
+                type: 'text',
+              },
+              {
+                label: 'Preço unit.',
+                property: 'unitPrice',
+                type: 'currency',
+              },
+              {
+                label: 'Receber',
+                property: 'receive',
+                type: 'render',
+                renderData: (data) => {
+                  const maxQuantity = data.quantity - data.receivedQuantity;
+                  if (maxQuantity <= 0) return null;
+                  return (
                     <ProductItemReceiveForm
                       productId={data.productId}
                       purchaseId={purchase.id}
                       maxQuantity={maxQuantity}
                     />
-                  ) : null}
-                </td>
-                <td>
-                  {canDelete ? (
+                  );
+                },
+              },
+              {
+                label: 'Deletar',
+                property: 'delete',
+                type: 'render',
+                renderData: (data) => {
+                  const canDelete = data.receivedQuantity === 0;
+                  if (!canDelete) return null;
+                  return (
                     <ProductItemDeleteButton
                       productId={data.productId}
                       purchaseId={purchase.id}
                     />
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="view-actions">
-        <Link to="edit">Editar</Link>
-        <Form method="post" onSubmit={(event) => {
-          if (
-            !confirm(
-              "Favor, confirme que você quer deletar esse registro."
-            )
-          ) {
-            event.preventDefault();
-          }
-        }}>
-          <button name="intent" value="delete" type="submit">
-            Deletar
-          </button>
-        </Form>
-      </div>
+                  );
+                }
+              },
+            ]}
+            rows={purchase.productItems}
+            idKey="productId"
+          />
+        </Item>
+      </List>
+      <Actions/>
     </div>
   );
 }

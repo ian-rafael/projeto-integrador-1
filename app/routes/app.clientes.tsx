@@ -1,5 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { Outlet, useLoaderData } from "@remix-run/react";
+import Index from "~/components";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
@@ -15,23 +16,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function Customers () {
   const { customers } = useLoaderData<typeof loader>();
   return (
-    <div className="index">
-      <h2>Clientes</h2>
-      <div className="list">
-        <Link to="create">Novo cliente</Link>
-        <ul>
-          {customers.map((customer) => {
-            return (
-              <li key={customer.id}>
-                <Link to={customer.id}>{customer.name}</Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <div className="action">
-        <Outlet/>
-      </div>
-    </div>
+    <>
+      <Index
+        createLabel="Novo cliente"
+        rows={customers}
+        title="Clientes"
+      />
+      <Outlet/>
+    </>
   );
 }

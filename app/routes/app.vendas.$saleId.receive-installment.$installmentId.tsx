@@ -41,9 +41,24 @@ export function SaleInstallmentPaymentForm ({saleId, installmentId}: {saleId: st
   const actionUrl = "/app/vendas/" + saleId + "/receive-installment/" + installmentId;
 
   return (
-    <fetcher.Form action={actionUrl} method="post">
-      <input name="date" type="date" required={true}/>
-      <button disabled={isUpdating} type="submit">Salvar</button>
+    <fetcher.Form
+      action={actionUrl}
+      method="post"
+      className="inline-flex gap-1"
+    >
+      <input
+        name="date"
+        type="date"
+        required={true}
+        className="h-5 leading-none"
+      />
+      <button
+        disabled={isUpdating}
+        type="submit"
+        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
+      >
+        Salvar
+      </button>
     </fetcher.Form>
   );
 }

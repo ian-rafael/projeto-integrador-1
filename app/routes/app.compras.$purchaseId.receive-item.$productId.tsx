@@ -77,9 +77,26 @@ export function ProductItemReceiveForm ({purchaseId, productId, maxQuantity}: {p
   }, [isSubmitting]);
 
   return (
-    <fetcher.Form action={actionUrl} method="post" ref={formRef}>
-      <input name="quantity" type="number" required={true} min={0} max={maxQuantity} autoComplete="off"/>
-      <button disabled={isUpdating} type="submit">
+    <fetcher.Form
+      action={actionUrl}
+      method="post"
+      ref={formRef}
+      className="inline-flex gap-1"
+    >
+      <input
+        name="quantity"
+        type="number"
+        required={true}
+        min={0}
+        max={maxQuantity}
+        autoComplete="off"
+        className="h-5 leading-none w-12"
+      />
+      <button
+        disabled={isUpdating}
+        type="submit"
+        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
+      >
         Add
       </button>
     </fetcher.Form>

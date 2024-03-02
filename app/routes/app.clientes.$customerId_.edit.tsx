@@ -2,7 +2,8 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Address, { type AddressType } from "~/components/address";
-import { CpfInput, Input, PhoneInput } from "~/components/form";
+import { CpfInput, Input, PhoneInput, SubmitButton } from "~/components/form";
+import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -14,7 +15,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.customerId, "params.customerId is required");
 
   const customer = await db.customer.findUnique({
-    select: { name: true, email: true, cpf: true, phone: true, address: true },
+    select: { id: true, name: true, email: true, cpf: true, phone: true, address: true },
     where: { id: params.customerId },
   });
 
@@ -93,6 +94,8 @@ export default function CustomerEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <Tag title="ID do cliente">{customer.id}</Tag>
+      <h3>Edição do cliente</h3>
       <Input
         attr={['name']}
         errorMessage={actionData?.fieldErrors?.name}
@@ -138,7 +141,7 @@ export default function CustomerEdit () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Salvar</button>
+      <SubmitButton>Salvar</SubmitButton>
     </Form>
   );
 }

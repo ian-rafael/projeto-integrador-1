@@ -2,7 +2,8 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Address, { type AddressType } from "~/components/address";
-import { CnpjInput, Input, PhoneInput } from "~/components/form";
+import { CnpjInput, Input, PhoneInput, SubmitButton } from "~/components/form";
+import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -14,7 +15,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.supplierId, "params.supplierId is required");
 
   const supplier = await db.supplier.findUnique({
-    select: { name: true, email: true, cnpj: true, phone: true, address: true },
+    select: { id: true, name: true, email: true, cnpj: true, phone: true, address: true },
     where: { id: params.supplierId },
   });
 
@@ -93,6 +94,8 @@ export default function SupplierEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <Tag title="ID do fornecedor">{supplier.id}</Tag>
+      <h3>Edição do fornecedor</h3>
       <Input
         attr={['name']}
         errorMessage={actionData?.fieldErrors?.name}
@@ -113,7 +116,7 @@ export default function SupplierEdit () {
         attr={['cnpj']}
         defaultValue={supplier.cnpj}
         errorMessage={actionData?.fieldErrors?.cnpj}
-        label="cnpj"
+        label="CNPJ"
         required={true}
       />
       <PhoneInput
@@ -138,7 +141,7 @@ export default function SupplierEdit () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Salvar</button>
+      <SubmitButton>Salvar</SubmitButton>
     </Form>
   );
 }

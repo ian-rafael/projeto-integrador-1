@@ -2,7 +2,8 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
-import { Input } from "~/components/form";
+import { Input, SubmitButton } from "~/components/form";
+import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -13,7 +14,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.userId, "params.userId is required");
 
   const user = await db.user.findUnique({
-    select: { name: true, username: true },
+    select: { id: true, name: true, username: true },
     where: { id: params.userId },
   });
 
@@ -81,6 +82,8 @@ export default function UserEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <Tag title="ID do usuário">{user.id}</Tag>
+      <h3>Edição do usuário</h3>
       <Input
         attr={['name']}
         defaultValue={user.name}
@@ -116,7 +119,7 @@ export default function UserEdit () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Salvar</button>
+      <SubmitButton>Salvar</SubmitButton>
     </Form>
   );
 }

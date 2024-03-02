@@ -1,7 +1,8 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import { Input, Textarea } from "~/components/form";
+import { Input, SubmitButton, Textarea } from "~/components/form";
+import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -13,7 +14,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.productId, "params.productId is required");
 
   const product = await db.product.findUnique({
-    select: { name: true, code: true, price: true, description: true },
+    select: { id: true, name: true, code: true, price: true, description: true },
     where: { id: params.productId },
   });
 
@@ -75,6 +76,8 @@ export default function ProductEdit () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <Tag title="ID do produto">{product.id}</Tag>
+      <h3>Edição do produto</h3>
       <Input
         attr={['name']}
         errorMessage={actionData?.fieldErrors?.name}
@@ -112,7 +115,7 @@ export default function ProductEdit () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Salvar</button>
+      <SubmitButton>Salvar</SubmitButton>
     </Form>
   );
 }

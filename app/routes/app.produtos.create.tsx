@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { Input, Textarea } from "~/components/form";
+import { Input, SubmitButton, Textarea } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -53,6 +53,7 @@ export default function ProductCreate () {
   const actionData = useActionData<typeof action>();
   return (
     <Form method="post">
+      <h3>Novo produto</h3>
       <Input
         attr={['name']}
         errorMessage={actionData?.fieldErrors?.name}
@@ -86,7 +87,7 @@ export default function ProductCreate () {
           {actionData.formError}
         </p>
       ) : null}
-      <button type="submit">Criar</button>
+      <SubmitButton>Criar</SubmitButton>
     </Form>
   );
 }

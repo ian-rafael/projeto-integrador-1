@@ -8,3 +8,7 @@ export function formatCurrency (value: number) {
 export function formatDate (value: string | Date) {
   return new Date(value).toLocaleDateString("pt-BR");
 }
+
+export function formatDateHour (value: string | Date) {
+  return new Date(value).toLocaleString("pt-BR");
+}

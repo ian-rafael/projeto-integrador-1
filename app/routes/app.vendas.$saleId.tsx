@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -7,7 +7,9 @@ import { requireUserId } from "~/utils/session.server";
 import { useEffect } from "react";
 import { $Enums } from "@prisma/client";
 import { SaleInstallmentPaymentForm } from "./app.vendas.$saleId.receive-installment.$installmentId";
-import { formatCurrency, formatDate } from "~/utils/formatters";
+import { formatDate, formatDateHour } from "~/utils/formatters";
+import Tag from "~/components/tag";
+import { Actions, Item, Table } from "~/components/view";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -43,7 +45,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       id: sale.id,
       createdAt: sale.createdAt,
       customerName: sale.customer.name,
-      installments: sale.installments,
+      installments: sale.installments.map((data, index) => ({
+        ...data,
+        paid: data.status === $Enums.StatusParcela.PAGO,
+        number: index + 1,
+      })),
       productItems: sale.productItems.map((data) => ({
         productName: data.product.name,
         productId: data.productId,
@@ -109,82 +115,66 @@ export default function SaleView () {
     }
   }, [actionData]);
 
+  console.log(sale.installments);
   return (
     <div>
-      <div className="view-item">
-        <b>Cliente: </b>
-        <span>{sale.customerName}</span>
-      </div>
-      <div className="view-item">
-        <b>Criado em: </b>
-        <span>
-          {new Date(sale.createdAt).toLocaleDateString("pt-BR")}
-          {', '}
-          {new Date(sale.createdAt).toLocaleTimeString("pt-BR")}
-        </span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço unitário</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sale.productItems.map((data) => {
-            return (
-              <tr key={data.productId}>
-                <td>{data.productName}</td>
-                <td>{data.quantity}</td>
-                <td>{formatCurrency(data.unitPrice)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <table>
-        <thead>
-          <tr>
-            <th>Parcela</th>
-            <th>Data de vencimento</th>
-            <th>Valor</th>
-            <th>Pago</th>
-            <th>Data de pagamento</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sale.installments.map((data, i) => {
-            return (
-              <tr key={data.id}>
-                <td>{i + 1}ª</td>
-                <td>{formatDate(data.dueDate)}</td>
-                <td>{formatCurrency(data.value)}</td>
-                <td>{data.status === $Enums.StatusParcela.PAGO ? "✅" : "❌"}</td>
-                <td>{data.paymentDate ? formatDate(data.paymentDate) : (
-                  <SaleInstallmentPaymentForm installmentId={data.id} saleId={sale.id}/>
-                )}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <div className="view-actions">
-        <Link to="edit">Editar</Link>
-        <Form method="post" onSubmit={(event) => {
-          if (
-            !confirm(
-              "Favor, confirme que você quer deletar esse registro."
-            )
-          ) {
-            event.preventDefault();
-          }
-        }}>
-          <button name="intent" value="delete" type="submit">
-            Deletar
-          </button>
-        </Form>
-      </div>
+      <Tag title="ID da venda">{sale.id}</Tag>
+      <h3>Venda</h3>
+      <Item title="Cliente">
+        {sale.customerName}
+      </Item>
+      <Item title="Criado">
+        {formatDateHour(sale.createdAt)}
+      </Item>
+      <Item title="Produtos">
+        <Table
+          cols={[
+            {
+              label: 'Nome',
+              property: 'productName',
+              type: 'text',
+            },
+            {
+              label: 'Qtd.',
+              property: 'quantity',
+              type: 'text',
+            },
+            {
+              label: 'Preço unit.',
+              property: 'unitPrice',
+              type: 'currency',
+            },
+          ]}
+          rows={sale.productItems}
+          idKey="productId"
+        />
+      </Item>
+      <Item title="Parcelas">
+        <Table
+          cols={[
+            {label: 'Nº', property: 'number', type: 'text'},
+            {label: 'Data de vencimento', property: 'dueDate', type: 'date'},
+            {label: 'Valor', property: 'value', type: 'currency'},
+            {label: 'Pago', property: 'paid', type: 'bool'},
+            {
+              label: 'Data de pagamento',
+              property: 'paymentDate',
+              type: 'render',
+              renderData: (data) => {
+                if (data.paymentDate) return formatDate(data.paymentDate);
+                return (
+                  <SaleInstallmentPaymentForm
+                    installmentId={data.id}
+                    saleId={sale.id}
+                  />
+                );
+              }
+            },
+          ]}
+          rows={sale.installments}
+        />
+      </Item>
+      <Actions/>
     </div>
   );
 }

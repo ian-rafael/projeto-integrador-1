@@ -1,8 +1,11 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import type { AddressType } from "~/components/address";
+import Tag from "~/components/tag";
+import { Actions, Item } from "~/components/view";
 import { db } from "~/utils/db.server";
+import { formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 
@@ -12,7 +15,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   invariant(params.customerId, "params.customerId is required");
 
   const customer = await db.customer.findUnique({
-    select: { name: true, email: true, cpf: true, phone: true, createdAt: true, address: true },
+    select: { id: true, name: true, email: true, cpf: true, phone: true, createdAt: true, address: true },
     where: { id: params.customerId },
   });
 
@@ -45,52 +48,29 @@ export default function CustomerView () {
   const { customer } = useLoaderData<typeof loader>();
   return (
     <div>
-      <div className="view-item">
-        <b>Nome: </b>
-        <span>{customer.name}</span>
-      </div>
-      <div className="view-item">
-        <b>Email: </b>
-        <span>{customer.email}</span>
-      </div>
-      <div className="view-item">
-        <b>CPF: </b>
-        <span>{customer.cpf}</span>
-      </div>
-      <div className="view-item">
-        <b>Telefone: </b>
-        <span>{customer.phone}</span>
-      </div>
-      <div className="view-item">
-        <b>Endereço: </b>
+      <Tag title="ID do cliente">{customer.id}</Tag>
+      <h3>Cliente</h3>
+      <Item title="Nome">
+        {customer.name}
+      </Item>
+      <Item title="Email">
+        {customer.email}
+      </Item>
+      <Item title="CPF">
+        {customer.cpf}
+      </Item>
+      <Item title="Telefone">
+        {customer.phone}
+      </Item>
+      <Item title="Endereço">
         <p>{customer.address.street}, {customer.address.number}</p>
         <p>{customer.address.city} - {customer.address.state}</p>
         <p>{customer.address.zipcode}</p>
-      </div>
-      <div className="view-item">
-        <b>Criado em: </b>
-        <span>
-          {new Date(customer.createdAt).toLocaleDateString("pt-BR")}
-          {', '}
-          {new Date(customer.createdAt).toLocaleTimeString("pt-BR")}
-        </span>
-      </div>
-      <div className="view-actions">
-        <Link to="edit">Editar</Link>
-        <Form method="post" onSubmit={(event) => {
-          if (
-            !confirm(
-              "Favor, confirme que você quer deletar esse registro."
-            )
-          ) {
-            event.preventDefault();
-          }
-        }}>
-          <button name="intent" value="delete" type="submit">
-            Deletar
-          </button>
-        </Form>
-      </div>
+      </Item>
+      <Item title="Criado">
+        {formatDateHour(customer.createdAt)}
+      </Item>
+      <Actions/>
     </div>
   );
 }

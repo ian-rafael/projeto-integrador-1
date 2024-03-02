@@ -59,8 +59,8 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
   return (
     <fieldset>
       <legend>Endereço</legend>
-      <div className="row">
-        <div className="col">
+      <div className="grid grid-cols-3 gap-1">
+        <div>
           <CepInput
             attr={['zipcode']}
             defaultValue = {defaultValues?.zipcode}
@@ -69,7 +69,7 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
             onData={onZipCodeData}
           />
         </div>
-        <div className="col">
+        <div>
           <Select
             options={stateOptions}
             attr={['state']}
@@ -79,7 +79,7 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
             value={state}
           />
         </div>
-        <div className="col">
+        <div>
           <Input
             attr={['city']}
             errorMessage={errorMessages?.city}
@@ -94,8 +94,8 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
           </datalist>
         </div>
       </div>
-      <div className="row">
-        <div className="col">
+      <div className="grid grid-cols-3 gap-1">
+        <div>
           <Input
             attr={['street']}
             errorMessage={errorMessages?.street}
@@ -105,7 +105,7 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
             value={street}
           />
         </div>
-        <div className="col">
+        <div>
           <Input
             attr={['number']}
             errorMessage={errorMessages?.number}
