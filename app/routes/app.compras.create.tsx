@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { ComboBox, FormArray, Input, SubmitButton } from "~/components/form";
+import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -100,9 +100,9 @@ export default function PurchaseCreate () {
         )}
       </FormArray>
       {actionData?.formError ? (
-        <p className="form-validation-error" role="alert">
+        <ValidationError>
           {actionData.formError}
-        </p>
+        </ValidationError>
       ) : null}
       <SubmitButton>Criar</SubmitButton>
     </Form>

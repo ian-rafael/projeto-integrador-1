@@ -115,7 +115,6 @@ export default function SaleView () {
     }
   }, [actionData]);
 
-  console.log(sale.installments);
   return (
     <div>
       <Tag title="ID da venda">{sale.id}</Tag>

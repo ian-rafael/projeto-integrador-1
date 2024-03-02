@@ -1,7 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import { ComboBox, SubmitButton } from "~/components/form";
+import { ComboBox, SubmitButton, ValidationError } from "~/components/form";
 import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -78,9 +78,9 @@ export default function PurchaseEdit () {
         required={true}
       />
       {actionData?.formError ? (
-        <p className="form-validation-error" role="alert">
+        <ValidationError>
           {actionData.formError}
-        </p>
+        </ValidationError>
       ) : null}
       <SubmitButton>Salvar</SubmitButton>
     </Form>

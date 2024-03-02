@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
+import { Input, SubmitButton, ValidationError } from "~/components/form";
 import { badRequest } from "~/utils/request.server";
 import { createUserSession, login } from "~/utils/session.server";
 
@@ -52,45 +53,29 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Login () {
   const actionData = useActionData<typeof action>();
   return (
-    <div id="login">
-      <Form method="post">
-        <h1>Login</h1>
-        <div className="form-element-container">
-          <label htmlFor="username-input">Nome de usuário</label>
-          <input
-            id="username-input"
-            name="username"
-            type="text"
-            required={true}
-            aria-invalid={Boolean(actionData?.fieldErrors?.username)}
-            aria-errormessage={actionData?.fieldErrors?.username ? "username-error" : undefined}
-          />
-          {actionData?.fieldErrors?.username ? (
-            <p className="form-validation-error" id="username-error" role="alert">
-              {actionData.fieldErrors.username}
-            </p>
-          ) : null}
-        </div>
-        <div className="form-element-container">
-          <label htmlFor="password-input">Senha</label>
-          <input
-            type="password"
-            name="password"
-            id="password-input"
-            required={true}
-            aria-invalid={Boolean(actionData?.fieldErrors?.password)}
-            aria-errormessage={actionData?.fieldErrors?.password ? "password-error" : undefined}
-          />
-          {actionData?.fieldErrors?.password ? (
-            <p className="form-validation-error" id="password-error" role="alert">
-              {actionData.fieldErrors.password}
-            </p>
-          ) : null}
-        </div>
+    <div className="h-screen grid place-items-center bg-slate-100">
+      <Form method="post" className="bg-slate-200 p-8 rounded min-w-80 max-w-80">
+        <h1 className="mb-8">Login</h1>
+        <Input
+          attr={['username']}
+          errorMessage={actionData?.fieldErrors?.username}
+          label="Nome de usuário"
+          required={true}
+          type="text"
+        />
+        <Input
+          attr={['password']}
+          errorMessage={actionData?.fieldErrors?.password}
+          label="Senha"
+          required={true}
+          type="password"
+        />
         {actionData?.formError ? (
-          <p className="form-validation-error" role="alert">{actionData.formError}</p>
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
         ) : null}
-        <button type="submit">Entrar</button>
+        <SubmitButton>Entrar</SubmitButton>
       </Form>
     </div>
   );

@@ -52,6 +52,18 @@ function resolveInputAttr (attr: string[]) {
   return {id, name, htmlFor: id, errorId};
 }
 
+export function ValidationError ({ children, className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p
+      className={clsx("text-xs text-red-500", className)}
+      role="alert"
+      {...props}
+    >
+      {children}
+    </p>
+  )
+}
+
 function Container ({
   className,
   children,
@@ -65,9 +77,9 @@ function Container ({
       {label && <label htmlFor={htmlFor}>{label}</label>}
       {children}
       {errorMessage ? (
-        <p className="form-validation-error" id={errorId} role="alert">
+        <ValidationError id={errorId}>
           {errorMessage}
-        </p>
+        </ValidationError>
       ) : null}
     </div>
   );

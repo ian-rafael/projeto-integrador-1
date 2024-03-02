@@ -52,7 +52,7 @@ export default function UserView () {
       <Item title="Nome">
         {user.name}
       </Item>
-      <Item title="Nome">
+      <Item title="Nome de usuário">
         {user.username}
       </Item>
       <Item title="Criado">

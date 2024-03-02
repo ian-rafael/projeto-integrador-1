@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { Input, SubmitButton, Textarea } from "~/components/form";
+import { Input, SubmitButton, Textarea, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -83,9 +83,9 @@ export default function ProductCreate () {
         rows={4}
       />
       {actionData?.formError ? (
-        <p className="form-validation-error" role="alert">
+        <ValidationError>
           {actionData.formError}
-        </p>
+        </ValidationError>
       ) : null}
       <SubmitButton>Criar</SubmitButton>
     </Form>

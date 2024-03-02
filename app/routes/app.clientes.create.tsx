@@ -1,7 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import Address from "~/components/address";
-import { CpfInput, Input, PhoneInput, SubmitButton } from "~/components/form";
+import { CpfInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -108,9 +108,9 @@ export default function CustomerCreate () {
         }}
       />
       {actionData?.formError ? (
-        <p className="form-validation-error" role="alert">
+        <ValidationError>
           {actionData.formError}
-        </p>
+        </ValidationError>
       ) : null}
       <SubmitButton>Criar</SubmitButton>
     </Form>

@@ -2,7 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Address, { type AddressType } from "~/components/address";
-import { CpfInput, Input, PhoneInput, SubmitButton } from "~/components/form";
+import { CpfInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
 import Tag from "~/components/tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -137,9 +137,9 @@ export default function CustomerEdit () {
         }}
       />
       {actionData?.formError ? (
-        <p className="form-validation-error" role="alert">
+        <ValidationError>
           {actionData.formError}
-        </p>
+        </ValidationError>
       ) : null}
       <SubmitButton>Salvar</SubmitButton>
     </Form>
