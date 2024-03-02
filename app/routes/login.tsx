@@ -1,13 +1,7 @@
-import type { ActionFunctionArgs, LinksFunction } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { badRequest } from "~/utils/request.server";
 import { createUserSession, login } from "~/utils/session.server";
-
-import stylesUrl from "~/styles/login.css";
-
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesUrl },
-];
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const form = await request.formData();
