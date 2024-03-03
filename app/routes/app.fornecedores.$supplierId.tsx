@@ -3,7 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import type { AddressType } from "~/components/address";
 import Tag from "~/components/tag";
-import { Actions, Item } from "~/components/view";
+import { Actions, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
@@ -50,26 +50,28 @@ export default function SupplierView () {
     <div>
       <Tag title="ID do fornecedor">{supplier.id}</Tag>
       <h3>Fornecedor</h3>
-      <Item title="Nome">
-        {supplier.name}
-      </Item>
-      <Item title="Email">
-        {supplier.email}
-      </Item>
-      <Item title="CNPJ">
-        {supplier.cnpj}
-      </Item>
-      <Item title="Telefone">
-        {supplier.phone}
-      </Item>
-      <Item title="Endereço">
-        <p>{supplier.address.street}, {supplier.address.number}</p>
-        <p>{supplier.address.city} - {supplier.address.state}</p>
-        <p>{supplier.address.zipcode}</p>
-      </Item>
-      <Item title="Criado em">
-        {formatDateHour(supplier.createdAt)}
-      </Item>
+      <List>
+        <Item title="Nome">
+          {supplier.name}
+        </Item>
+        <Item title="Email">
+          {supplier.email}
+        </Item>
+        <Item title="CNPJ">
+          {supplier.cnpj}
+        </Item>
+        <Item title="Telefone">
+          {supplier.phone}
+        </Item>
+        <Item title="Endereço">
+          <p>{supplier.address.street}, {supplier.address.number}</p>
+          <p>{supplier.address.city} - {supplier.address.state}</p>
+          <p>{supplier.address.zipcode}</p>
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(supplier.createdAt)}
+        </Item>
+      </List>
       <Actions/>
     </div>
   );

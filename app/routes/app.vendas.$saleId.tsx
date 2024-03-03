@@ -9,7 +9,7 @@ import { $Enums } from "@prisma/client";
 import { SaleInstallmentPaymentForm } from "./app.vendas.$saleId.receive-installment.$installmentId";
 import { formatDate, formatDateHour } from "~/utils/formatters";
 import Tag from "~/components/tag";
-import { Actions, Item, Table } from "~/components/view";
+import { Actions, Item, List, Table } from "~/components/view";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -119,60 +119,62 @@ export default function SaleView () {
     <div>
       <Tag title="ID da venda">{sale.id}</Tag>
       <h3>Venda</h3>
-      <Item title="Cliente">
-        {sale.customerName}
-      </Item>
-      <Item title="Criado em">
-        {formatDateHour(sale.createdAt)}
-      </Item>
-      <Item title="Produtos">
-        <Table
-          cols={[
-            {
-              label: 'Nome',
-              property: 'productName',
-              type: 'text',
-            },
-            {
-              label: 'Qtd.',
-              property: 'quantity',
-              type: 'text',
-            },
-            {
-              label: 'Preço unit.',
-              property: 'unitPrice',
-              type: 'currency',
-            },
-          ]}
-          rows={sale.productItems}
-          idKey="productId"
-        />
-      </Item>
-      <Item title="Parcelas">
-        <Table
-          cols={[
-            {label: 'Nº', property: 'number', type: 'text'},
-            {label: 'Data de vencimento', property: 'dueDate', type: 'date'},
-            {label: 'Valor', property: 'value', type: 'currency'},
-            {label: 'Pago', property: 'paid', type: 'bool'},
-            {
-              label: 'Data de pagamento',
-              property: 'paymentDate',
-              type: 'render',
-              renderData: (data) => {
-                if (data.paymentDate) return formatDate(data.paymentDate);
-                return (
-                  <SaleInstallmentPaymentForm
-                    installmentId={data.id}
-                    saleId={sale.id}
-                  />
-                );
-              }
-            },
-          ]}
-          rows={sale.installments}
-        />
-      </Item>
+      <List>
+        <Item title="Cliente">
+          {sale.customerName}
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(sale.createdAt)}
+        </Item>
+        <Item title="Produtos">
+          <Table
+            cols={[
+              {
+                label: 'Nome',
+                property: 'productName',
+                type: 'text',
+              },
+              {
+                label: 'Qtd.',
+                property: 'quantity',
+                type: 'text',
+              },
+              {
+                label: 'Preço unit.',
+                property: 'unitPrice',
+                type: 'currency',
+              },
+            ]}
+            rows={sale.productItems}
+            idKey="productId"
+          />
+        </Item>
+        <Item title="Parcelas">
+          <Table
+            cols={[
+              {label: 'Nº', property: 'number', type: 'text'},
+              {label: 'Data de vencimento', property: 'dueDate', type: 'date'},
+              {label: 'Valor', property: 'value', type: 'currency'},
+              {label: 'Pago', property: 'paid', type: 'bool'},
+              {
+                label: 'Data de pagamento',
+                property: 'paymentDate',
+                type: 'render',
+                renderData: (data) => {
+                  if (data.paymentDate) return formatDate(data.paymentDate);
+                  return (
+                    <SaleInstallmentPaymentForm
+                      installmentId={data.id}
+                      saleId={sale.id}
+                    />
+                  );
+                }
+              },
+            ]}
+            rows={sale.installments}
+          />
+        </Item>
+      </List>
       <Actions/>
     </div>
   );

@@ -3,7 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import type { AddressType } from "~/components/address";
 import Tag from "~/components/tag";
-import { Actions, Item } from "~/components/view";
+import { Actions, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
@@ -50,26 +50,28 @@ export default function CustomerView () {
     <div>
       <Tag title="ID do cliente">{customer.id}</Tag>
       <h3>Cliente</h3>
-      <Item title="Nome">
-        {customer.name}
-      </Item>
-      <Item title="Email">
-        {customer.email}
-      </Item>
-      <Item title="CPF">
-        {customer.cpf}
-      </Item>
-      <Item title="Telefone">
-        {customer.phone}
-      </Item>
-      <Item title="Endereço">
-        <p>{customer.address.street}, {customer.address.number}</p>
-        <p>{customer.address.city} - {customer.address.state}</p>
-        <p>{customer.address.zipcode}</p>
-      </Item>
-      <Item title="Criado em">
-        {formatDateHour(customer.createdAt)}
-      </Item>
+      <List>
+        <Item title="Nome">
+          {customer.name}
+        </Item>
+        <Item title="Email">
+          {customer.email}
+        </Item>
+        <Item title="CPF">
+          {customer.cpf}
+        </Item>
+        <Item title="Telefone">
+          {customer.phone}
+        </Item>
+        <Item title="Endereço">
+          <p>{customer.address.street}, {customer.address.number}</p>
+          <p>{customer.address.city} - {customer.address.state}</p>
+          <p>{customer.address.zipcode}</p>
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(customer.createdAt)}
+        </Item>
+      </List>
       <Actions/>
     </div>
   );

@@ -2,7 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Tag from "~/components/tag";
-import { Actions, Item } from "~/components/view";
+import { Actions, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatCurrency, formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
@@ -57,24 +57,26 @@ export default function ProductView () {
     <div>
       <Tag title="ID do produto">{product.id}</Tag>
       <h3>Produto</h3>
-      <Item title="Nome">
-        {product.name}
-      </Item>
-      <Item title="Código">
-        {product.code}
-      </Item>
-      <Item title="Preço">
-        {formatCurrency(product.price)}
-      </Item>
-      <Item title="Estoque">
-        {product.stock}
-      </Item>
-      <Item title="Descrição">
-        {product.description}
-      </Item>
-      <Item title="Criado em">
-        {formatDateHour(product.createdAt)}
-      </Item>
+      <List>
+        <Item title="Nome">
+          {product.name}
+        </Item>
+        <Item title="Código">
+          {product.code}
+        </Item>
+        <Item title="Preço">
+          {formatCurrency(product.price)}
+        </Item>
+        <Item title="Estoque">
+          {product.stock}
+        </Item>
+        <Item title="Descrição">
+          {product.description}
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(product.createdAt)}
+        </Item>
+      </List>
       <Actions/>
     </div>
   );

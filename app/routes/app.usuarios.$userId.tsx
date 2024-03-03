@@ -2,7 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import Tag from "~/components/tag";
-import { Actions, Item } from "~/components/view";
+import { Actions, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
@@ -49,15 +49,17 @@ export default function UserView () {
     <div>
       <Tag title="ID do usuário">{user.id}</Tag>
       <h3>Usuário</h3>
-      <Item title="Nome">
-        {user.name}
-      </Item>
-      <Item title="Nome de usuário">
-        {user.username}
-      </Item>
-      <Item title="Criado em">
-        {formatDateHour(user.createdAt)}
-      </Item>
+      <List>
+        <Item title="Nome">
+          {user.name}
+        </Item>
+        <Item title="Nome de usuário">
+          {user.username}
+        </Item>
+        <Item title="Criado em">
+          {formatDateHour(user.createdAt)}
+        </Item>
+      </List>
       {!isAdmin ? <Actions/> : null}
     </div>
   );
