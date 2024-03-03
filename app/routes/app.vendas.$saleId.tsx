@@ -122,7 +122,7 @@ export default function SaleView () {
       <Item title="Cliente">
         {sale.customerName}
       </Item>
-      <Item title="Criado">
+      <Item title="Criado em">
         {formatDateHour(sale.createdAt)}
       </Item>
       <Item title="Produtos">

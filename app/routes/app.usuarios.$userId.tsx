@@ -55,7 +55,7 @@ export default function UserView () {
       <Item title="Nome de usuário">
         {user.username}
       </Item>
-      <Item title="Criado">
+      <Item title="Criado em">
         {formatDateHour(user.createdAt)}
       </Item>
       {!isAdmin ? <Actions/> : null}

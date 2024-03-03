@@ -72,7 +72,7 @@ export default function ProductView () {
       <Item title="Descrição">
         {product.description}
       </Item>
-      <Item title="Criado">
+      <Item title="Criado em">
         {formatDateHour(product.createdAt)}
       </Item>
       <Actions/>

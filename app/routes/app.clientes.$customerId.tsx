@@ -67,7 +67,7 @@ export default function CustomerView () {
         <p>{customer.address.city} - {customer.address.state}</p>
         <p>{customer.address.zipcode}</p>
       </Item>
-      <Item title="Criado">
+      <Item title="Criado em">
         {formatDateHour(customer.createdAt)}
       </Item>
       <Actions/>
