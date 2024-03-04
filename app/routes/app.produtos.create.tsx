@@ -1,5 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
 import { Input, SubmitButton, Textarea, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -52,42 +54,47 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function ProductCreate () {
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
-      <h3>Novo produto</h3>
-      <Input
-        attr={['name']}
-        errorMessage={actionData?.fieldErrors?.name}
-        required={true}
-        label="Nome"
-        type="text"
-      />
-      <Input
-        attr={['code']}
-        errorMessage={actionData?.fieldErrors?.code}
-        required={true}
-        label="Código"
-        type="text"
-      />
-      <Input
-        attr={['price']}
-        errorMessage={actionData?.fieldErrors?.price}
-        required={true}
-        label="Preço"
-        type="number"
-        step=".01"
-        min={0}
-      />
-      <Textarea
-        attr={['description']}
-        label="Descrição"
-        rows={4}
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Criar</SubmitButton>
-    </Form>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Novo produto</h3>
+      </FrameHeader>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          errorMessage={actionData?.fieldErrors?.name}
+          required={true}
+          label="Nome"
+          type="text"
+        />
+        <Input
+          attr={['code']}
+          errorMessage={actionData?.fieldErrors?.code}
+          required={true}
+          label="Código"
+          type="text"
+        />
+        <Input
+          attr={['price']}
+          errorMessage={actionData?.fieldErrors?.price}
+          required={true}
+          label="Preço"
+          type="number"
+          step=".01"
+          min={0}
+        />
+        <Textarea
+          attr={['description']}
+          label="Descrição"
+          rows={4}
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Criar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

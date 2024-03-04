@@ -1,7 +1,9 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import Tag from "~/components/tag";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { Actions, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatDateHour } from "~/utils/formatters";
@@ -46,9 +48,12 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 export default function UserView () {
   const { user, isAdmin } = useLoaderData<typeof loader>();
   return (
-    <div>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Usuário</h3>
+      </FrameHeader>
       <Tag title="ID do usuário">{user.id}</Tag>
-      <h3>Usuário</h3>
       <List>
         <Item title="Nome">
           {user.name}
@@ -61,6 +66,6 @@ export default function UserView () {
         </Item>
       </List>
       {!isAdmin ? <Actions/> : null}
-    </div>
+    </Frame>
   );
 }

@@ -1,6 +1,6 @@
 import { redirect, type LoaderFunctionArgs, json } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
-import Layout from "~/components/layout";
+import Layout from "~/components/Layout";
 import { getUser } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

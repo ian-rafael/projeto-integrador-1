@@ -1,6 +1,8 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
 import { Input, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -54,46 +56,51 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function UserCreate () {
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
-      <h3>Novo usuário</h3>
-      <Input
-        attr={['name']}
-        defaultValue={actionData?.fields?.name}
-        errorMessage={actionData?.fieldErrors?.name}
-        label="Nome"
-        required={true}
-        type="text"
-      />
-      <Input
-        attr={['username']}
-        defaultValue={actionData?.fields?.username}
-        errorMessage={actionData?.fieldErrors?.username}
-        label="Nome de usuário"
-        required={true}
-        type="text"
-      />
-      <Input
-        attr={['password']}
-        errorMessage={actionData?.fieldErrors?.password}
-        label="Senha"
-        minLength={8}
-        required={true}
-        type="password"
-      />
-      <Input
-        attr={['repeat_password']}
-        errorMessage={actionData?.fieldErrors?.repeatPassword}
-        label="Repita a senha"
-        minLength={8}
-        required={true}
-        type="password"
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Criar</SubmitButton>
-    </Form>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Novo usuário</h3>
+      </FrameHeader>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          defaultValue={actionData?.fields?.name}
+          errorMessage={actionData?.fieldErrors?.name}
+          label="Nome"
+          required={true}
+          type="text"
+        />
+        <Input
+          attr={['username']}
+          defaultValue={actionData?.fields?.username}
+          errorMessage={actionData?.fieldErrors?.username}
+          label="Nome de usuário"
+          required={true}
+          type="text"
+        />
+        <Input
+          attr={['password']}
+          errorMessage={actionData?.fieldErrors?.password}
+          label="Senha"
+          minLength={8}
+          required={true}
+          type="password"
+        />
+        <Input
+          attr={['repeat_password']}
+          errorMessage={actionData?.fieldErrors?.repeatPassword}
+          label="Repita a senha"
+          minLength={8}
+          required={true}
+          type="password"
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Criar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

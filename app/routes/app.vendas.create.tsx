@@ -1,6 +1,8 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { DateTime } from "luxon";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
 import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -100,74 +102,79 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function SaleCreate () {
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
-      <h3>Nova venda</h3>
-      <ComboBox
-        attr={['customer']}
-        errorMessage={actionData?.fieldErrors?.customer}
-        label="Cliente"
-        required={true}
-        url="/app/clientes-search"
-      />
-      <div className="grid grid-cols-2 gap-1">
-        <div>
-          <Input
-            attr={['installment_quantity']}
-            defaultValue={1}
-            errorMessage={actionData?.fieldErrors?.installmentQuantity}
-            label="Parcelas"
-            max={12}
-            min={1}
-            required={true}
-            type="number"
-          />
-        </div>
-        <div>
-          <Input
-            attr={['due_date']}
-            defaultValue={new Date().toISOString().split('T')[0]}
-            errorMessage={actionData?.fieldErrors?.dueDate}
-            required={true}
-            label="Data do primeiro vencimento"
-            type="date"
-          />
-        </div>
-      </div>
-      <FormArray defaultLength={1}>
-        {(i) => (
-          <div className="grid grid-cols-3 gap-1">
-            <ComboBox
-              attr={['product']}
-              errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-              label="Produto"
-              required={true}
-              url="/app/produtos-search"
-            />
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Nova venda</h3>
+      </FrameHeader>
+      <Form method="post">
+        <ComboBox
+          attr={['customer']}
+          errorMessage={actionData?.fieldErrors?.customer}
+          label="Cliente"
+          required={true}
+          url="/app/clientes-search"
+        />
+        <div className="grid grid-cols-2 gap-1">
+          <div>
             <Input
-              attr={['quantity']}
+              attr={['installment_quantity']}
               defaultValue={1}
-              label="Quantidade"
+              errorMessage={actionData?.fieldErrors?.installmentQuantity}
+              label="Parcelas"
+              max={12}
               min={1}
               required={true}
               type="number"
             />
+          </div>
+          <div>
             <Input
-              attr={['unitPrice']}
-              label="Preço unitário"
-              min={0}
+              attr={['due_date']}
+              defaultValue={new Date().toISOString().split('T')[0]}
+              errorMessage={actionData?.fieldErrors?.dueDate}
               required={true}
-              step=".01"
-              type="number"
+              label="Data do primeiro vencimento"
+              type="date"
             />
           </div>
-        )}
-      </FormArray>
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Criar</SubmitButton>
-    </Form>
+        </div>
+        <FormArray defaultLength={1}>
+          {(i) => (
+            <div className="grid grid-cols-3 gap-1">
+              <ComboBox
+                attr={['product']}
+                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
+                label="Produto"
+                required={true}
+                url="/app/produtos-search"
+              />
+              <Input
+                attr={['quantity']}
+                defaultValue={1}
+                label="Quantidade"
+                min={1}
+                required={true}
+                type="number"
+              />
+              <Input
+                attr={['unitPrice']}
+                label="Preço unitário"
+                min={0}
+                required={true}
+                step=".01"
+                type="number"
+              />
+            </div>
+          )}
+        </FormArray>
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Criar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

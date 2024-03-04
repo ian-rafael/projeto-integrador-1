@@ -1,9 +1,11 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import Address, { type AddressType } from "~/components/address";
+import Address, { type AddressType } from "~/components/Address";
+import BackLink from "~/components/BackLink";
 import { CpfInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
-import Tag from "~/components/tag";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -93,55 +95,60 @@ export default function CustomerEdit () {
   const { customer } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Edição do cliente</h3>
+      </FrameHeader>
       <Tag title="ID do cliente">{customer.id}</Tag>
-      <h3>Edição do cliente</h3>
-      <Input
-        attr={['name']}
-        errorMessage={actionData?.fieldErrors?.name}
-        required={true}
-        label="Nome"
-        type="text"
-        defaultValue={customer.name}
-      />
-      <Input
-        attr={['email']}
-        defaultValue={customer.email}
-        errorMessage={actionData?.fieldErrors?.email}
-        label="Email"
-        required={true}
-        type="email"
-      />
-      <CpfInput
-        attr={['cpf']}
-        defaultValue={customer.cpf}
-        errorMessage={actionData?.fieldErrors?.cpf}
-        required={true}
-        label="CPF"
-      />
-      <PhoneInput
-        attr={['phone']}
-        defaultValue={customer.phone}
-        errorMessage={actionData?.fieldErrors?.phone}
-        label="Telefone"
-        required={true}
-      />
-      <Address
-        defaultValues={customer.address}
-        errorMessages={{
-          zipcode: actionData?.fieldErrors?.zipcode,
-          state: actionData?.fieldErrors?.state,
-          city: actionData?.fieldErrors?.city,
-          street: actionData?.fieldErrors?.street,
-          number: actionData?.fieldErrors?.number,
-        }}
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Salvar</SubmitButton>
-    </Form>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          errorMessage={actionData?.fieldErrors?.name}
+          required={true}
+          label="Nome"
+          type="text"
+          defaultValue={customer.name}
+        />
+        <Input
+          attr={['email']}
+          defaultValue={customer.email}
+          errorMessage={actionData?.fieldErrors?.email}
+          label="Email"
+          required={true}
+          type="email"
+        />
+        <CpfInput
+          attr={['cpf']}
+          defaultValue={customer.cpf}
+          errorMessage={actionData?.fieldErrors?.cpf}
+          required={true}
+          label="CPF"
+        />
+        <PhoneInput
+          attr={['phone']}
+          defaultValue={customer.phone}
+          errorMessage={actionData?.fieldErrors?.phone}
+          label="Telefone"
+          required={true}
+        />
+        <Address
+          defaultValues={customer.address}
+          errorMessages={{
+            zipcode: actionData?.fieldErrors?.zipcode,
+            state: actionData?.fieldErrors?.state,
+            city: actionData?.fieldErrors?.city,
+            street: actionData?.fieldErrors?.street,
+            number: actionData?.fieldErrors?.number,
+          }}
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Salvar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

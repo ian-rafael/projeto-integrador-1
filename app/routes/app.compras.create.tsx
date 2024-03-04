@@ -1,5 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
 import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -61,50 +63,55 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function PurchaseCreate () {
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
-      <h3>Nova compra</h3>
-      <ComboBox
-        attr={['supplier']}
-        errorMessage={actionData?.fieldErrors?.supplier}
-        label="Fornecedor"
-        required={true}
-        url="/app/fornecedores-search"
-      />
-      <FormArray defaultLength={1}>
-        {(i) => (
-          <div className="grid grid-cols-3 gap-1">
-            <ComboBox
-              attr={['product']}
-              errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-              label="Produto"
-              required={true}
-              url="/app/produtos-search"
-            />
-            <Input
-              attr={['quantity']}
-              defaultValue={1}
-              label="Quantidade"
-              min={1}
-              required={true}
-              type="number"
-            />
-            <Input
-              attr={['unitPrice']}
-              label="Preço unitário"
-              min={0}
-              required={true}
-              step=".01"
-              type="number"
-            />
-          </div>
-        )}
-      </FormArray>
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Criar</SubmitButton>
-    </Form>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Nova compra</h3>
+      </FrameHeader>
+      <Form method="post">
+        <ComboBox
+          attr={['supplier']}
+          errorMessage={actionData?.fieldErrors?.supplier}
+          label="Fornecedor"
+          required={true}
+          url="/app/fornecedores-search"
+        />
+        <FormArray defaultLength={1}>
+          {(i) => (
+            <div className="grid grid-cols-3 gap-1">
+              <ComboBox
+                attr={['product']}
+                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
+                label="Produto"
+                required={true}
+                url="/app/produtos-search"
+              />
+              <Input
+                attr={['quantity']}
+                defaultValue={1}
+                label="Quantidade"
+                min={1}
+                required={true}
+                type="number"
+              />
+              <Input
+                attr={['unitPrice']}
+                label="Preço unitário"
+                min={0}
+                required={true}
+                step=".01"
+                type="number"
+              />
+            </div>
+          )}
+        </FormArray>
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Criar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

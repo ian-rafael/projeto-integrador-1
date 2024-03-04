@@ -1,5 +1,5 @@
 import { ExitIcon } from "@radix-ui/react-icons";
-import { Form, Link, NavLink } from "@remix-run/react";
+import { Form, Link, NavLink, useLocation } from "@remix-run/react";
 import clsx from "clsx/lite";
 
 function NavListItem ({to, children}: {to: string, children: React.ReactNode}) {
@@ -7,12 +7,12 @@ function NavListItem ({to, children}: {to: string, children: React.ReactNode}) {
     <li>
       <NavLink
         className={({isActive}) => clsx(
-          "block p-4 relative",
+          "block p-4",
           isActive && clsx(
-            "bg-slate-200 rounded-s-full",
-            "before:block before:w-4 before:h-4 before:absolute before:-top-4 before:right-0 before:rounded-br-2xl before:bg-slate-100 before:shadow-slate-200 before:shadow-[5px_5px_0_5px_var(--tw-shadow)]",
-            "after:block after:w-4 after:h-4 after:absolute after:-bottom-4 after:right-0 after:rounded-tr-2xl after:bg-slate-100 after:shadow-slate-200 after:shadow-[5px_-5px_0_5px_var(--tw-shadow)]",
-          )
+            "lg:bg-slate-200 lg:rounded-s-full lg:relative",
+            "lg:before:block lg:before:w-4 lg:before:h-4 lg:before:absolute lg:before:-top-4 lg:before:right-0 lg:before:rounded-br-2xl lg:before:bg-slate-100 lg:before:shadow-slate-200 lg:before:shadow-[5px_5px_0_5px_var(--tw-shadow)]",
+            "lg:after:block lg:after:w-4 lg:after:h-4 lg:after:absolute lg:after:-bottom-4 lg:after:right-0 lg:after:rounded-tr-2xl lg:after:bg-slate-100 lg:after:shadow-slate-200 lg:after:shadow-[5px_-5px_0_5px_var(--tw-shadow)]",
+          ),
         )}
         to={to}
       >
@@ -24,8 +24,8 @@ function NavListItem ({to, children}: {to: string, children: React.ReactNode}) {
 
 function NavBar () {
   return (
-    <nav className="my-8">
-      <ul className="grid gap-6 ml-4">
+    <nav>
+      <ul className="px-4 grid gap-4 lg:pr-0">
         <NavListItem to="produtos">Produtos</NavListItem>
         <NavListItem to="clientes">Clientes</NavListItem>
         <NavListItem to="vendas">Vendas</NavListItem>
@@ -48,15 +48,22 @@ function LogoutButton () {
 }
 
 function Header ({username}: {username: string}) {
+  const location = useLocation();
+  const isOpen = new URLSearchParams(location.search).get('open') === "menu";
   return (
-    <header className="bg-slate-100 grid grid-rows-[auto_1fr_auto] max-w-60 py-4 sticky top-0 max-h-screen">
+    <header
+      className={clsx(
+        "bg-slate-100 w-full min-h-screen lg:w-80 grid gap-10 grid-rows-[auto_1fr_auto] py-4",
+        isOpen ? "absolute z-20 lg:relative" : "hidden xl:grid",
+      )}
+    >
       <h1 className="px-4">
         <Link to="/app">Projeto Integrador</Link>
       </h1>
       <NavBar/>
       <div className="px-4 grid grid-cols-[1fr_auto] gap-px">
         <span
-          className="leading-none p-3 bg-slate-200 rounded-s-full whitespace-nowrap overflow-hidden text-ellipsis"
+          className="flex items-center px-3 bg-slate-200 rounded-s-full whitespace-nowrap overflow-hidden text-ellipsis"
           title={username}
         >
           {username}
@@ -77,9 +84,9 @@ interface LayoutProps {
 
 export default function Layout ({ children, user }: LayoutProps) {
   return (
-    <div className="grid grid-cols-[auto_1fr] min-h-screen">
+    <div className="min-h-screen flex">
       <Header username={user.name}/>
-      <main className="bg-slate-200 px-12 py-8 grid grid-cols-2">
+      <main className="flex-1 bg-slate-200">
         {children}
       </main>
     </div>

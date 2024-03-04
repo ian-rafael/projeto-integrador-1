@@ -2,8 +2,10 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
+import BackLink from "~/components/BackLink";
 import { Input, SubmitButton, ValidationError } from "~/components/form";
-import Tag from "~/components/tag";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -81,45 +83,50 @@ export default function UserEdit () {
   const { user } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Edição do usuário</h3>
+      </FrameHeader>
       <Tag title="ID do usuário">{user.id}</Tag>
-      <h3>Edição do usuário</h3>
-      <Input
-        attr={['name']}
-        defaultValue={user.name}
-        errorMessage={actionData?.fieldErrors?.name}
-        label="Nome"
-        required={true}
-        type="text"
-      />
-      <Input
-        attr={['username']}
-        defaultValue={user.username}
-        errorMessage={actionData?.fieldErrors?.username}
-        label="Nome de usuário"
-        required={true}
-        type="text"
-      />
-      <Input
-        attr={['password']}
-        errorMessage={actionData?.fieldErrors?.password}
-        label="Senha"
-        minLength={8}
-        type="password"
-      />
-      <Input
-        attr={['repeat_password']}
-        errorMessage={actionData?.fieldErrors?.repeatPassword}
-        label="Repita a senha"
-        minLength={8}
-        type="password"
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Salvar</SubmitButton>
-    </Form>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          defaultValue={user.name}
+          errorMessage={actionData?.fieldErrors?.name}
+          label="Nome"
+          required={true}
+          type="text"
+        />
+        <Input
+          attr={['username']}
+          defaultValue={user.username}
+          errorMessage={actionData?.fieldErrors?.username}
+          label="Nome de usuário"
+          required={true}
+          type="text"
+        />
+        <Input
+          attr={['password']}
+          errorMessage={actionData?.fieldErrors?.password}
+          label="Senha"
+          minLength={8}
+          type="password"
+        />
+        <Input
+          attr={['repeat_password']}
+          errorMessage={actionData?.fieldErrors?.repeatPassword}
+          label="Repita a senha"
+          minLength={8}
+          type="password"
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Salvar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

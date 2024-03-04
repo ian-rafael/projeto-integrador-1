@@ -8,8 +8,10 @@ import { useEffect } from "react";
 import { $Enums } from "@prisma/client";
 import { SaleInstallmentPaymentForm } from "./app.vendas.$saleId.receive-installment.$installmentId";
 import { formatDate, formatDateHour } from "~/utils/formatters";
-import Tag from "~/components/tag";
+import Tag from "~/components/Tag";
 import { Actions, Item, List, Table } from "~/components/view";
+import { Frame, FrameHeader } from "~/components/frame";
+import BackLink from "~/components/BackLink";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -116,9 +118,12 @@ export default function SaleView () {
   }, [actionData]);
 
   return (
-    <div>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Venda</h3>
+      </FrameHeader>
       <Tag title="ID da venda">{sale.id}</Tag>
-      <h3>Venda</h3>
       <List>
         <Item title="Cliente">
           {sale.customerName}
@@ -176,6 +181,6 @@ export default function SaleView () {
         </Item>
       </List>
       <Actions/>
-    </div>
+    </Frame>
   );
 }

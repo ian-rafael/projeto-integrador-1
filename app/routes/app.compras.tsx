@@ -1,6 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
-import Index from "~/components";
+import Index from "~/components/Index";
 import { db } from "~/utils/db.server";
 import { formatDate } from "~/utils/formatters";
 import { requireUserId } from "~/utils/session.server";
@@ -29,13 +29,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function Purchases () {
   const {purchases} = useLoaderData<typeof loader>();
   return (
-    <>
-      <Index
-        createLabel="Nova compra"
-        rows={purchases}
-        title="Compras"
-      />
+    <Index rows={purchases} title="Compras">
       <Outlet/>
-    </>
+    </Index>
   );
 }

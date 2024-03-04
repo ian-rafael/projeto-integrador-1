@@ -1,9 +1,11 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
-import Address, { type AddressType } from "~/components/address";
+import Address, { type AddressType } from "~/components/Address";
+import BackLink from "~/components/BackLink";
 import { CnpjInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
-import Tag from "~/components/tag";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -93,55 +95,60 @@ export default function SupplierEdit () {
   const { supplier } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Edição do fornecedor</h3>
+      </FrameHeader>
       <Tag title="ID do fornecedor">{supplier.id}</Tag>
-      <h3>Edição do fornecedor</h3>
-      <Input
-        attr={['name']}
-        errorMessage={actionData?.fieldErrors?.name}
-        required={true}
-        label="Nome"
-        type="text"
-        defaultValue={supplier.name}
-      />
-      <Input
-        attr={['email']}
-        defaultValue={supplier.email}
-        errorMessage={actionData?.fieldErrors?.email}
-        label="Email"
-        required={true}
-        type="email"
-      />
-      <CnpjInput
-        attr={['cnpj']}
-        defaultValue={supplier.cnpj}
-        errorMessage={actionData?.fieldErrors?.cnpj}
-        label="CNPJ"
-        required={true}
-      />
-      <PhoneInput
-        attr={['phone']}
-        defaultValue={supplier.phone}
-        errorMessage={actionData?.fieldErrors?.phone}
-        label="Telefone"
-        required={true}
-      />
-      <Address 
-        defaultValues={supplier.address}
-        errorMessages={{
-          zipcode: actionData?.fieldErrors?.zipcode,
-          state: actionData?.fieldErrors?.state,
-          city: actionData?.fieldErrors?.city,
-          street: actionData?.fieldErrors?.street,
-          number: actionData?.fieldErrors?.number,
-        }}
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Salvar</SubmitButton>
-    </Form>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          errorMessage={actionData?.fieldErrors?.name}
+          required={true}
+          label="Nome"
+          type="text"
+          defaultValue={supplier.name}
+        />
+        <Input
+          attr={['email']}
+          defaultValue={supplier.email}
+          errorMessage={actionData?.fieldErrors?.email}
+          label="Email"
+          required={true}
+          type="email"
+        />
+        <CnpjInput
+          attr={['cnpj']}
+          defaultValue={supplier.cnpj}
+          errorMessage={actionData?.fieldErrors?.cnpj}
+          label="CNPJ"
+          required={true}
+        />
+        <PhoneInput
+          attr={['phone']}
+          defaultValue={supplier.phone}
+          errorMessage={actionData?.fieldErrors?.phone}
+          label="Telefone"
+          required={true}
+        />
+        <Address
+          defaultValues={supplier.address}
+          errorMessages={{
+            zipcode: actionData?.fieldErrors?.zipcode,
+            state: actionData?.fieldErrors?.state,
+            city: actionData?.fieldErrors?.city,
+            street: actionData?.fieldErrors?.street,
+            number: actionData?.fieldErrors?.number,
+          }}
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Salvar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

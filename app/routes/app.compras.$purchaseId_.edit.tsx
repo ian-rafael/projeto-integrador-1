@@ -1,8 +1,10 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import BackLink from "~/components/BackLink";
 import { ComboBox, SubmitButton, ValidationError } from "~/components/form";
-import Tag from "~/components/tag";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -66,23 +68,28 @@ export default function PurchaseEdit () {
   const { purchase } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Edição da compra</h3>
+      </FrameHeader>
       <Tag title="ID da compra">{purchase.id}</Tag>
-      <h3>Edição da compra</h3>
-      <ComboBox
-        attr={['supplier']}
-        defaultValue={{id: purchase.supplier.id, label: purchase.supplier.name}}
-        errorMessage={actionData?.fieldErrors?.supplier}
-        url="/app/fornecedores-search"
-        label="Fornecedor"
-        required={true}
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Salvar</SubmitButton>
-    </Form>
+      <Form method="post">
+        <ComboBox
+          attr={['supplier']}
+          defaultValue={{id: purchase.supplier.id, label: purchase.supplier.name}}
+          errorMessage={actionData?.fieldErrors?.supplier}
+          url="/app/fornecedores-search"
+          label="Fornecedor"
+          required={true}
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Salvar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

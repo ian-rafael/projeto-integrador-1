@@ -1,6 +1,8 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import Address from "~/components/address";
+import Address from "~/components/Address";
+import BackLink from "~/components/BackLink";
+import { Frame, FrameHeader } from "~/components/frame";
 import { CpfInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -70,49 +72,54 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function CustomerCreate () {
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
-      <h3>Novo cliente</h3>
-      <Input
-        attr={['name']}
-        errorMessage={actionData?.fieldErrors?.name}
-        required={true}
-        label="Nome"
-        type="text"
-      />
-      <Input
-        attr={['email']}
-        errorMessage={actionData?.fieldErrors?.email}
-        required={true}
-        label="Email"
-        type="email"
-      />
-      <CpfInput
-        attr={['cpf']}
-        errorMessage={actionData?.fieldErrors?.cpf}
-        required={true}
-        label="CPF"
-      />
-      <PhoneInput
-        attr={['phone']}
-        errorMessage={actionData?.fieldErrors?.phone}
-        required={true}
-        label="Telefone"
-      />
-      <Address
-        errorMessages={{
-          zipcode: actionData?.fieldErrors?.zipcode,
-          state: actionData?.fieldErrors?.state,
-          city: actionData?.fieldErrors?.city,
-          street: actionData?.fieldErrors?.street,
-          number: actionData?.fieldErrors?.number,
-        }}
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Criar</SubmitButton>
-    </Form>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Novo cliente</h3>
+      </FrameHeader>
+      <Form method="post">
+        <Input
+          attr={['name']}
+          errorMessage={actionData?.fieldErrors?.name}
+          required={true}
+          label="Nome"
+          type="text"
+        />
+        <Input
+          attr={['email']}
+          errorMessage={actionData?.fieldErrors?.email}
+          required={true}
+          label="Email"
+          type="email"
+        />
+        <CpfInput
+          attr={['cpf']}
+          errorMessage={actionData?.fieldErrors?.cpf}
+          required={true}
+          label="CPF"
+        />
+        <PhoneInput
+          attr={['phone']}
+          errorMessage={actionData?.fieldErrors?.phone}
+          required={true}
+          label="Telefone"
+        />
+        <Address
+          errorMessages={{
+            zipcode: actionData?.fieldErrors?.zipcode,
+            state: actionData?.fieldErrors?.state,
+            city: actionData?.fieldErrors?.city,
+            street: actionData?.fieldErrors?.street,
+            number: actionData?.fieldErrors?.number,
+          }}
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Criar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }

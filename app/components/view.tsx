@@ -4,14 +4,15 @@ import clsx from "clsx/lite";
 import { formatCurrency, formatDate } from "~/utils/formatters";
 
 export function List ({children}: {children: React.ReactNode}) {
-  return <dl>{children}</dl>;
+  // grid para funcionar o overflow (table)
+  return <dl className="grid">{children}</dl>;
 }
 
 export function Item ({children, title}: {children: React.ReactNode, title: string}) {
   return (
     <>
       <dt className="text-sm font-bold inline-block p-1">{title}</dt>
-      <dd className="mb-3">{children}</dd>
+      <dd className="mb-3 overflow-x-auto">{children}</dd>
     </>
   )
 }

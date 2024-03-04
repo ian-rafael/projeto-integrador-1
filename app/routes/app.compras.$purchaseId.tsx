@@ -8,8 +8,10 @@ import { ProductItemDeleteButton } from "./app.compras.$purchaseId.delete-item.$
 import { ProductItemReceiveForm } from "./app.compras.$purchaseId.receive-item.$productId";
 import { useEffect } from "react";
 import { formatDateHour } from "~/utils/formatters";
-import Tag from "~/components/tag";
+import Tag from "~/components/Tag";
 import { Actions, Item, List, Table } from "~/components/view";
+import { Frame, FrameHeader } from "~/components/frame";
+import BackLink from "~/components/BackLink";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -102,9 +104,12 @@ export default function PurchaseView () {
   }, [actionData]);
 
   return (
-    <div>
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Compra</h3>
+      </FrameHeader>
       <Tag title="ID da compra">{purchase.id}</Tag>
-      <h3>Compra</h3>
       <List>
         <Item title="Fornecedor">
           {purchase.supplierName}
@@ -173,6 +178,6 @@ export default function PurchaseView () {
         </Item>
       </List>
       <Actions/>
-    </div>
+    </Frame>
   );
 }

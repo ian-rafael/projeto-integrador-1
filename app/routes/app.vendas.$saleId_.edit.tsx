@@ -1,8 +1,10 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import BackLink from "~/components/BackLink";
 import { ComboBox, SubmitButton, ValidationError } from "~/components/form";
-import Tag from "~/components/tag";
+import { Frame, FrameHeader } from "~/components/frame";
+import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -67,23 +69,28 @@ export default function SaleEdit () {
   const { sale } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
-    <Form method="post">
+    <Frame>
+      <FrameHeader>
+        <BackLink/>
+        <h3>Edição da venda</h3>
+      </FrameHeader>
       <Tag title="ID da venda">{sale.id}</Tag>
-      <h3>Edição da venda</h3>
-      <ComboBox
-        attr={['customer']}
-        defaultValue={{id: sale.customer.id, label: sale.customer.name}}
-        errorMessage={actionData?.fieldErrors?.customer}
-        label="Cliente"
-        required={true}
-        url="/app/clientes-search"
-      />
-      {actionData?.formError ? (
-        <ValidationError>
-          {actionData.formError}
-        </ValidationError>
-      ) : null}
-      <SubmitButton>Salvar</SubmitButton>
-    </Form>
+      <Form method="post">
+        <ComboBox
+          attr={['customer']}
+          defaultValue={{id: sale.customer.id, label: sale.customer.name}}
+          errorMessage={actionData?.fieldErrors?.customer}
+          label="Cliente"
+          required={true}
+          url="/app/clientes-search"
+        />
+        {actionData?.formError ? (
+          <ValidationError>
+            {actionData.formError}
+          </ValidationError>
+        ) : null}
+        <SubmitButton>Salvar</SubmitButton>
+      </Form>
+    </Frame>
   );
 }
