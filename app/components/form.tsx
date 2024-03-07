@@ -196,6 +196,7 @@ export function CepInput ({defaultValue, onData, ...rest}: Omit<InputProps, "typ
   onData?: (cep: CEP) => void,
 }) {
   const [value, setValue] = useState(maskCEP(defaultValue || ""));
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = () => {
     if (!value) {
@@ -207,13 +208,17 @@ export function CepInput ({defaultValue, onData, ...rest}: Omit<InputProps, "typ
       window.alert(error);
       return;
     }
+    setIsLoading(true);
     cep(value)
       .then(onData)
-      .catch((reason) => window.alert(reason.message));
+      .catch((reason) => window.alert(reason.message))
+      .finally(() => setIsLoading(false));
   };
 
   const appendElement = (
     <button
+      disabled={isLoading}
+      className={clsx(isLoading && "opacity-15")}
       type="button"
       onClick={handleSearch}
     >

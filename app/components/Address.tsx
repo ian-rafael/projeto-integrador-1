@@ -46,11 +46,6 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
   const [number, setNumber] = useState(defaultValues?.number || '');
 
   const onZipCodeData = (values: CEP) => {
-    const message = "Preencher os dados automaticamente?\n"
-      + "Estado: " + values.state + "\n"
-      + "Cidade: " + values.city + "\n"
-      + "Rua: " + values.street;
-    if (!window.confirm(message)) return;
     setState(values.state);
     setCity(values.city);
     setStreet(values.street);
