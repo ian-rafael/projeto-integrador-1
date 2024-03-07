@@ -3,7 +3,7 @@ import { CaretSortIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useFetcher } from "@remix-run/react";
 import cep, { type CEP } from "cep-promise";
 import clsx from "clsx/lite";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { maskCEP, maskCNPJ, maskCPF, maskPhone } from "~/utils/masks";
 import { validateCEP } from "~/utils/validators";
 
@@ -46,8 +46,10 @@ interface FormArrayProps {
   defaultLength?: number;
 }
 
-function resolveInputAttr (attr: string[]) {
-  const id = attr.join('_');
+function useInputAttr (attr: string[]) {
+  const prefix = useId();
+  const id = prefix + '-' + attr.join('_');
+  // não tá sendo usado attr com mais de uma string por enquanto
   const name = attr.reduce((acc, v) => `${acc}[${v}]`);
   const errorId = `${id}-error`;
   return {id, name, htmlFor: id, errorId};
@@ -89,7 +91,7 @@ function Container ({
 const inputClassNames = "w-full p-2 shadow-sm rounded-sm";
 
 export function Input ({ appendElement, label, attr, errorMessage, ...inputProps }: InputProps) {
-  const {id, name, htmlFor, errorId} = resolveInputAttr(attr);
+  const {id, name, htmlFor, errorId} = useInputAttr(attr);
   return (
     <Container
       label={label}
@@ -117,7 +119,7 @@ export function Input ({ appendElement, label, attr, errorMessage, ...inputProps
 }
 
 export function Textarea ({ label, attr, errorMessage, ...inputProps }: TextareaProps) {
-  const {id, name, htmlFor, errorId} = resolveInputAttr(attr);
+  const {id, name, htmlFor, errorId} = useInputAttr(attr);
   return (
     <Container
       label={label}
@@ -138,7 +140,7 @@ export function Textarea ({ label, attr, errorMessage, ...inputProps }: Textarea
 }
 
 export function Select ({ label, attr, errorMessage, options, ...selectProps }: SelectProps) {
-  const {id, name, htmlFor, errorId} = resolveInputAttr(attr);
+  const {id, name, htmlFor, errorId} = useInputAttr(attr);
   return (
     <Container
       label={label}
@@ -318,7 +320,7 @@ export function ComboBox ({
 }: ComboBoxProps) {
   const fetcher = useFetcher<Option[]>();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const {name, errorId} = resolveInputAttr(attr);
+  const {name, errorId} = useInputAttr(attr);
 
   const load = (term: string) => {
     if (timerRef.current) {
