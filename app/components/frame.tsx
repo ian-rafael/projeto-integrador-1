@@ -1,6 +1,6 @@
 export function Frame ({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pb-2 px-4 lg:overflow-y-auto lg:max-h-screen">
+    <div className="pb-2 px-4 min-h-screen lg:overflow-y-auto lg:max-h-screen">
       {children}
     </div>
   );

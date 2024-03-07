@@ -15,7 +15,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const customerId = form.get("customer[id]");
   const installmentQuantity = form.get("installment_quantity");
   const firstDueDate = form.get("due_date");
-  const products = form.getAll("product[id]");
+  const productIds = form.getAll("product[id]");
   const quantities = form.getAll("quantity");
   const unitPrices = form.getAll("unitPrice");
 
@@ -23,9 +23,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     typeof customerId !== "string"
     || typeof installmentQuantity !== "string"
     || typeof firstDueDate !== "string"
-    || products.length === 0
-    || quantities.length !== products.length
-    || unitPrices.length !== products.length
+    || productIds.length === 0
+    || quantities.length !== productIds.length
+    || unitPrices.length !== productIds.length
   ) {
     return badRequest({
       fields: null,
@@ -33,6 +33,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       formError: "Form submitted incorrectly",
     });
   }
+
+  const productItems = productIds.map((productId, i) => ({
+    productId: String(productId),
+    quantity: parseInt(String(quantities[i])),
+    unitPrice: Number(unitPrices[i]),
+  }));
+  const products = await db.product.findMany({
+    select: { id: true, stock: true },
+    where: { id: { in: productIds as string[] }},
+  });
+  const productsStockMap = Object.fromEntries(products.map(({id, stock}) => [id, stock]));
 
   const fields = { customer: customerId, installment_quantity: installmentQuantity, due_date: firstDueDate };
   const fieldErrors = {
@@ -45,7 +56,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ? "O máximo de parcelas é 12"
       : undefined,
     dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
-    products: products.map((value, i) => products.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
+    // slice para não aparecer o texto em dois inputs diferentes
+    products: productIds.map((value, i) => productIds.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
+    quantities: productItems.map(({productId, quantity}) =>
+      quantity > productsStockMap[productId]
+      ? `Quantidade maior do que estoque (${productsStockMap[productId]})`
+      : undefined
+    ),
   };
   if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
     return badRequest({
@@ -56,7 +73,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   let total = 0;
-  for (let i = 0; i < products.length; i++) {
+  for (let i = 0; i < productIds.length; i++) {
     total += Number(unitPrices[i]) * Number(quantities[i]);
   }
 
@@ -72,11 +89,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       customerId: customerId,
       productItems: {
         createMany: {
-          data: products.map((productId, i) => ({
-            productId: String(productId),
-            quantity: parseInt(String(quantities[i])),
-            unitPrice: Number(unitPrices[i]),
-          })),
+          data: productItems,
         },
       },
       installments: {
@@ -87,9 +100,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     },
   });
 
-  for (let i = 0; i < products.length; i++) {
+  for (let i = 0; i < productIds.length; i++) {
     const decrement = Number(quantities[i]);
-    const id = String(products[i]);
+    const id = String(productIds[i]);
     await db.product.update({
       data: { stock: { decrement } },
       where: { id },
@@ -153,6 +166,7 @@ export default function SaleCreate () {
                 attr={['quantity']}
                 defaultValue={1}
                 label="Quantidade"
+                errorMessage={actionData?.fieldErrors?.quantities[i] || undefined}
                 min={1}
                 required={true}
                 type="number"
