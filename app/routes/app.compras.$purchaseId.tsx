@@ -67,13 +67,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     const count = await db.productPurchase.count({
       where: {
         purchaseId: params.purchaseId,
-        AND: [
-          {
-            receivedQuantity: {
-              gte: 1,
-            },
-          },
-        ],
+        receivedQuantity: { gte: 1 },
       },
     });
 

@@ -22,10 +22,20 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return badRequest({ error: "Form submitted incorrectly" });
   }
 
+  const record = await db.saleInstallment.findUnique({
+    where: { id: params.installmentId },
+  });
+
+  if (!record) {
+    return json({error: "Record not found"}, { status: 404 });
+  }
+
+  if (record.status === $Enums.StatusParcela.PAGO) {
+    return badRequest({ error: "Parcela já está paga" });
+  }
+
   await db.saleInstallment.update({
-    where: {
-      id: params.installmentId,
-    },
+    where: { id: params.installmentId },
     data: {
       status: $Enums.StatusParcela.PAGO,
       paymentDate: DateTime.fromISO(date).toJSDate(),

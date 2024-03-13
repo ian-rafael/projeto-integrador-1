@@ -73,7 +73,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     const count = await db.saleInstallment.count({
       where: {
         saleId: params.saleId,
-        AND: [{ status: $Enums.StatusParcela.PAGO }],
+        status: $Enums.StatusParcela.PAGO,
       },
     });
 

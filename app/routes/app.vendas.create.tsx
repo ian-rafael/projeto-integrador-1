@@ -72,10 +72,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-  let total = 0;
-  for (let i = 0; i < productIds.length; i++) {
-    total += Number(unitPrices[i]) * Number(quantities[i]);
-  }
+  const total = productItems.reduce((acc, {quantity, unitPrice}) => {
+    return acc + (unitPrice * quantity);
+  }, 0);
 
   const installments = [];
   const value = total / Number(installmentQuantity);
@@ -100,14 +99,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     },
   });
 
-  for (let i = 0; i < productIds.length; i++) {
-    const decrement = Number(quantities[i]);
-    const id = String(productIds[i]);
+  await Promise.all(productItems.map(async ({productId: id, quantity: decrement}) => {
     await db.product.update({
       data: { stock: { decrement } },
       where: { id },
     });
-  }
+  }));
 
   return redirect("/app/vendas/" + sale.id);
 };

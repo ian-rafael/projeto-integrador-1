@@ -32,6 +32,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   invariant(params.userId, "params.userId is required");
 
+  const recordUser = await db.user.findUnique({
+    select: { username: true },
+    where: {id: params.userId},
+  });
+  if (recordUser?.username === "administrador") {
+    throw json("Forbidden", { status: 403 });
+  }
+
   const form = await request.formData();
   const intent = form.get("intent");
   if (intent === "delete") {

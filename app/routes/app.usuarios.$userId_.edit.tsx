@@ -24,6 +24,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("User not found", { status: 404 });
   }
 
+  if (user.username === "administrador") {
+    throw json("Forbidden", { status: 403 });
+  }
+
   return json({ user });
 };
 
@@ -31,6 +35,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
   invariant(params.userId, "params.userId is required");
+
+  const recordUser = await db.user.findUnique({
+    select: { username: true },
+    where: {id: params.userId},
+  });
+  if (recordUser?.username === "administrador") {
+    throw json("Forbidden", { status: 403 });
+  }
 
   const form = await request.formData();
   const name = form.get("name");
