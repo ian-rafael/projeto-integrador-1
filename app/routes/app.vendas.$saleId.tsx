@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useActionData, useLoaderData } from "@remix-run/react";
+import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -21,7 +21,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const sale = await db.sale.findUnique({
     select: {
       createdAt: true,
-      customer: { select: { name: true } },
+      customer: { select: { id: true, name: true } },
       id: true,
       productItems: {
         select: {
@@ -46,6 +46,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     sale: {
       id: sale.id,
       createdAt: sale.createdAt,
+      customerId: sale.customer.id,
       customerName: sale.customer.name,
       installments: sale.installments.map((data, index) => ({
         ...data,
@@ -126,7 +127,12 @@ export default function SaleView () {
       <Tag title="ID da venda">{sale.id}</Tag>
       <List>
         <Item title="Cliente">
-          {sale.customerName}
+          <Link
+            className="hover:underline"
+            to={`/app/clientes/${sale.customerId}`}
+          >
+            {sale.customerName}
+          </Link>
         </Item>
         <Item title="Criado em">
           {formatDateHour(sale.createdAt)}

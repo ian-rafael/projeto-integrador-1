@@ -22,6 +22,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const city = form.get("city");
   const street = form.get("street");
   const number = form.get("number");
+  const complement = form.get("complement");
 
   if (
     typeof name !== "string"
@@ -33,6 +34,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     || typeof city !== "string"
     || typeof street !== "string"
     || typeof number !== "string"
+    || typeof complement !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -52,6 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     city: false ? "" : undefined,
     street: false ? "" : undefined,
     number: false ? "" : undefined,
+    complement: false ? "" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -61,7 +64,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-  const address = { zipcode, state, city, street, number: number ? Number(number) : number };
+  const address = { zipcode, state, city, street, number: number ? Number(number) : number, complement };
   const supplier = await db.supplier.create({
     data: { name, cnpj, email, phone, address },
   });

@@ -1,6 +1,6 @@
 import { ExitIcon } from "@radix-ui/react-icons";
 import { Form, Link, NavLink, useLocation } from "@remix-run/react";
-import clsx from "clsx/lite";
+import { clsx } from "clsx/lite";
 
 function NavListItem ({to, children}: {to: string, children: React.ReactNode}) {
   return (

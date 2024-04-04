@@ -43,6 +43,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const city = form.get("city");
   const street = form.get("street");
   const number = form.get("number");
+  const complement = form.get("complement");
 
   if (
     typeof name !== "string"
@@ -54,6 +55,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     || typeof city !== "string"
     || typeof street !== "string"
     || typeof number !== "string"
+    || typeof complement !== "string"
   ) {
     return badRequest({
       fields: null,
@@ -73,6 +75,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     city: false ? "" : undefined,
     street: false ? "" : undefined,
     number: false ? "" : undefined,
+    complement: false ? "" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -82,7 +85,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     });
   }
 
-  const address = { zipcode, state, city, street, number: number ? Number(number) : number };
+  const address = { zipcode, state, city, street, number: number ? Number(number) : number, complement };
   const customer = await db.customer.update({
     where: { id: params.customerId },
     data: { name, cpf, email, phone, address },

@@ -5,7 +5,7 @@ import type { AddressType } from "~/components/Address";
 import BackLink from "~/components/BackLink";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
-import { Actions, Item, List } from "~/components/view";
+import { Actions, AddressView, Item, List } from "~/components/view";
 import { db } from "~/utils/db.server";
 import { formatDateHour } from "~/utils/formatters";
 import { badRequest } from "~/utils/request.server";
@@ -69,9 +69,7 @@ export default function SupplierView () {
           {supplier.phone}
         </Item>
         <Item title="Endereço">
-          <p>{supplier.address.street}, {supplier.address.number}</p>
-          <p>{supplier.address.city} - {supplier.address.state}</p>
-          <p>{supplier.address.zipcode}</p>
+          <AddressView data={supplier.address}/>
         </Item>
         <Item title="Criado em">
           {formatDateHour(supplier.createdAt)}

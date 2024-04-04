@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useActionData, useLoaderData } from "@remix-run/react";
+import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -21,7 +21,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const purchase = await db.purchase.findUnique({
     select: {
       createdAt: true,
-      supplier: { select: { name: true } },
+      supplier: { select: { id: true, name: true } },
       id: true,
       productItems: {
         select: {
@@ -44,6 +44,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     purchase: {
       id: purchase.id,
       createdAt: purchase.createdAt,
+      supplierId: purchase.supplier.id,
       supplierName: purchase.supplier.name,
       productItems: purchase.productItems.map((data) => ({
         productName: data.product.name,
@@ -106,7 +107,12 @@ export default function PurchaseView () {
       <Tag title="ID da compra">{purchase.id}</Tag>
       <List>
         <Item title="Fornecedor">
-          {purchase.supplierName}
+          <Link
+            className="hover:underline"
+            to={`/app/fornecedores/${purchase.supplierId}`}
+          >
+            {purchase.supplierName}
+          </Link>
         </Item>
         <Item title="Criado em">
           {formatDateHour(purchase.createdAt)}

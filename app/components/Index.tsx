@@ -1,21 +1,23 @@
 import { MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Link, useLocation, useResolvedPath } from "@remix-run/react";
-import clsx from "clsx/lite";
+import { clsx } from "clsx/lite";
 import MenuButton from "./MenuButton";
 
-type Rows = {id: string, name: string, extra?: any}[];
+type Data = {id: string, name: string, extra?: unknown};
+type Rows = Data[];
+type RenderRow = (data: Data) => React.ReactNode;
 
-function List ({ rows }: { rows: Rows }) {
+function List ({ rows, renderRow }: { rows: Rows, renderRow?: RenderRow }) {
   return (
     <ul className="grid gap-2 py-2">
       {rows.map((data) => {
         return (
           <li className="bg-slate-300 rounded-md hover:brightness-95" key={data.id}>
             <Link
-              className="block p-2"
+              className="flex items-center justify-between p-2"
               to={data.id}
             >
-              {data.name}
+              {typeof renderRow === "function" ? renderRow(data) : data.name}
             </Link>
           </li>
         );
@@ -40,9 +42,10 @@ interface IndexProps {
   title: string,
   children: React.ReactNode,
   rows: Rows;
+  renderRow?: RenderRow;
 }
 
-export default function Index ({ title, children, rows }: IndexProps) {
+export default function Index ({ title, children, rows, renderRow }: IndexProps) {
   const location = useLocation();
   const path = useResolvedPath('.');
   const isIndex = location.pathname === path.pathname;
@@ -64,7 +67,7 @@ export default function Index ({ title, children, rows }: IndexProps) {
           </div>
         </header>
         <CreateLink/>
-        <List rows={rows}/>
+        <List rows={rows} renderRow={renderRow}/>
       </div>
       <div className={clsx(isMenuOpen && "lg:empty:hidden xl:empty:block")}>
         {children}

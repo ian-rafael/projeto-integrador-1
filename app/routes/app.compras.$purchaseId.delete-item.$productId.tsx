@@ -46,7 +46,19 @@ export function ProductItemDeleteButton ({purchaseId, productId}: {purchaseId: s
   const isDeleting = fetcher.state !== "idle";
   const action = "/app/compras/" + purchaseId + "/delete-item/" + productId;
   return (
-    <fetcher.Form action={action} method="post">
+    <fetcher.Form
+      action={action}
+      method="post"
+      onSubmit={(event) => {
+        if (
+          !confirm(
+            "Favor, confirme que você quer deletar esse registro."
+          )
+        ) {
+          event.preventDefault();
+        }
+      }}
+    >
       <button
         className="p-1 text-red-500 hover:brightness-95"
         disabled={isDeleting}

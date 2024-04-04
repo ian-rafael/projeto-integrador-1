@@ -1,3 +1,4 @@
+import { CheckIcon } from "@radix-ui/react-icons";
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { useEffect, useRef } from "react";
@@ -84,20 +85,21 @@ export function ProductItemReceiveForm ({purchaseId, productId, maxQuantity}: {p
       className="inline-flex gap-1"
     >
       <input
-        name="quantity"
-        type="number"
-        required={true}
-        min={0}
-        max={maxQuantity}
         autoComplete="off"
-        className="h-5 leading-none w-12"
+        className="h-5 leading-none w-10"
+        defaultValue={maxQuantity}
+        max={maxQuantity}
+        min={0}
+        name="quantity"
+        required={true}
+        type="number"
       />
       <button
         disabled={isUpdating}
         type="submit"
         className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
       >
-        Add
+        <CheckIcon/>
       </button>
     </fetcher.Form>
   );

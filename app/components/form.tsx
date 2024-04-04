@@ -2,7 +2,7 @@ import { Combobox } from "@headlessui/react";
 import { CaretSortIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useFetcher } from "@remix-run/react";
 import cep, { type CEP } from "cep-promise";
-import clsx from "clsx/lite";
+import { clsx } from "clsx/lite";
 import { useEffect, useId, useRef, useState } from "react";
 import { maskCEP, maskCNPJ, maskCPF, maskPhone } from "~/utils/masks";
 import { validateCEP } from "~/utils/validators";

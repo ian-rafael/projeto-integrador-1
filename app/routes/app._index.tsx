@@ -76,7 +76,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   ]);
 
   return json({
-    inflow: inflow._sum.value,
+    inflow: inflow._sum.value || 0,
     lateInstallments,
     nextInstallments,
     toBeReceivedProducts,
@@ -109,7 +109,7 @@ export default function App () {
               {inflow && formatCurrency(inflow)}
             </span>
           </p>
-          <h4>Parcelas atrasadas</h4>
+          <h4>Parcelas atrasadas:</h4>
           <ul>
             {lateInstallments.map((data) => (
               <li key={data.id}>
@@ -126,7 +126,7 @@ export default function App () {
               </li>
             ))}
           </ul>
-          <h4>Próximas parcelas</h4>
+          <h4>Próximas parcelas:</h4>
           <ul>
             {nextInstallments.map((data) => (
               <li key={data.id}>
@@ -153,7 +153,7 @@ export default function App () {
               {outflow && formatCurrency(outflow)}
             </span>
           </p>
-          <h4>A ser recebido</h4>
+          <h4>A ser recebido:</h4>
           <ul>
             {toBeReceivedProducts.map((data) => (
               <li key={data.purchaseId + '-' + data.productId}>

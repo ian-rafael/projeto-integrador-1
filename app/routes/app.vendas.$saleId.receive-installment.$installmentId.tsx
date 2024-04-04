@@ -60,6 +60,7 @@ export function SaleInstallmentPaymentForm ({saleId, installmentId}: {saleId: st
         name="date"
         type="date"
         required={true}
+        defaultValue={DateTime.now().toFormat('yyyy-LL-dd')}
         className="h-5 leading-none"
       />
       <button

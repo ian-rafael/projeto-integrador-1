@@ -21,6 +21,7 @@ interface AddressProps {
     city?: string
     street?: string
     number?: number | string
+    complement?: string
   },
   errorMessages?: {
     zipcode?: string
@@ -28,6 +29,7 @@ interface AddressProps {
     city?: string
     street?: string
     number?: string
+    complement?: string
   },
 }
 
@@ -37,6 +39,7 @@ export interface AddressType {
   city?: string
   street?: string
   number?: number
+  complement?: number
 }
 
 export default function Address ({defaultValues, errorMessages}: AddressProps) {
@@ -44,11 +47,14 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
   const [city, setCity] = useState(defaultValues?.city || '');
   const [street, setStreet] = useState(defaultValues?.street || '');
   const [number, setNumber] = useState(defaultValues?.number || '');
+  const [complement, setComplement] = useState(defaultValues?.complement || '');
 
   const onZipCodeData = (values: CEP) => {
     setState(values.state);
     setCity(values.city);
     setStreet(values.street);
+    setNumber('');
+    setComplement('');
   };
 
   return (
@@ -108,6 +114,16 @@ export default function Address ({defaultValues, errorMessages}: AddressProps) {
             onChange={(e) => setNumber(e.target.value)}
             type="number"
             value={number}
+          />
+        </div>
+        <div>
+          <Input
+            attr={['complement']}
+            errorMessage={errorMessages?.complement}
+            label="Complemento"
+            onChange={(e) => setComplement(e.target.value)}
+            type="text"
+            value={complement}
           />
         </div>
       </div>

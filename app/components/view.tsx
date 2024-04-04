@@ -1,7 +1,8 @@
 import { CheckIcon, Cross2Icon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Form, Link } from "@remix-run/react";
-import clsx from "clsx/lite";
+import { clsx } from "clsx/lite";
 import { formatCurrency, formatDate } from "~/utils/formatters";
+import { AddressType } from "./Address";
 
 export function List ({children}: {children: React.ReactNode}) {
   // grid para funcionar o overflow (table)
@@ -64,7 +65,7 @@ export function Table ({ cols, rows, idKey = 'id' }: TableProps) {
             {cols.map((colData, index) => (
               <td
                 key={colData.property}
-                className={clsx("py-2", index !== 0 && "text-center")}
+                className={clsx("py-3", index !== 0 && "text-center")}
               >
                 {typeof colData.renderData === "function"
                   ? colData.renderData(data)
@@ -125,4 +126,14 @@ export function Actions () {
       <DeleteButton/>
     </div>
   );
+}
+
+export function AddressView ({data}: {data: AddressType}) {
+  return (
+    <>
+      <p>{[data.street, data.number, data.complement].filter(Boolean).join(', ')}</p>
+      <p>{[data.city, data.state].filter(Boolean).join(' - ')}</p>
+      <p>{data.zipcode}</p>
+    </>
+  )
 }
