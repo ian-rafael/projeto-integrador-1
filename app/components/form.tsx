@@ -14,6 +14,7 @@ interface ContainerProps {
   errorMessage?: string;
   htmlFor?: string;
   label?: string;
+  labelPosition?: "pre" | "post";
 }
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -74,11 +75,13 @@ function Container ({
   errorId,
   htmlFor,
   label,
+  labelPosition = "pre",
 }: ContainerProps) {
   return (
     <div className={clsx("mb-2", className)}>
-      {label && <label htmlFor={htmlFor}>{label}</label>}
+      {labelPosition === "pre" && label && <label htmlFor={htmlFor}>{label}</label>}
       {children}
+      {labelPosition === "post" && label && <label htmlFor={htmlFor}>{label}</label>}
       {errorMessage ? (
         <ValidationError id={errorId}>
           {errorMessage}
@@ -92,16 +95,18 @@ const inputClassNames = "w-full p-2 shadow-sm rounded-sm";
 
 export function Input ({ appendElement, label, attr, errorMessage, ...inputProps }: InputProps) {
   const {id, name, htmlFor, errorId} = useInputAttr(attr);
+  const isRadioInput = inputProps.type === "radio";
   return (
     <Container
       label={label}
       htmlFor={htmlFor}
       errorId={errorId}
       errorMessage={errorMessage}
+      labelPosition={isRadioInput ? "post" : "pre"}
     >
-      <div className="relative">
+      <div className={clsx("relative", isRadioInput && "inline-block mr-1")}>
         <input
-          className={clsx(inputClassNames, appendElement && "pr-7")}
+          className={clsx(inputClassNames, appendElement && "pr-7", isRadioInput && "shadow-none")}
           id={id}
           name={name}
           aria-invalid={Boolean(errorMessage)}
@@ -344,6 +349,7 @@ export function ComboBox ({
       errorId={errorId}
       errorMessage={errorMessage}
       name={name}
+      nullable={true}
     >
       <Combobox.Label>{label}</Combobox.Label>
       <div className="relative">
@@ -381,10 +387,10 @@ export function ComboBox ({
   );
 }
 
-export function SubmitButton ({children}: {children: React.ReactNode}) {
+export function SubmitButton ({className, children}: {children: React.ReactNode, className?: string}) {
   return (
     <button
-      className="px-6 py-1 mt-4 bg-slate-400 text-slate-50 rounded-sm shadow-sm hover:brightness-95"
+      className={clsx(className, "px-6 py-1 mt-4 bg-slate-400 text-slate-50 rounded-sm shadow-sm hover:brightness-95")}
       type="submit"
     >
       {children}

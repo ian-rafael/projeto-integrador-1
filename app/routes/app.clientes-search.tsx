@@ -1,6 +1,7 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
+import { escapeFilterString } from "~/utils/helper";
 import { requireUserId } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -15,7 +16,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     select: { id: true, name: true },
     where: {
       name: {
-        contains: term.replace(/[%_]/g, (match: string) => `\\${match}`),
+        contains: escapeFilterString(term),
         mode: "insensitive",
       },
     },
