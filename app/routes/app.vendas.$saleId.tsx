@@ -70,6 +70,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const form = await request.formData();
   const intent = form.get("intent");
+
   if (intent === "delete") {
     const count = await db.saleInstallment.count({
       where: {
@@ -88,18 +89,17 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       where: { saleId: params.saleId },
     });
 
-    for (let i = 0; i < productItems.length; i++) {
-      const id = productItems[i].productId;
-      const increment = productItems[i].quantity;
+    await Promise.all(productItems.map(async ({ productId: id, quantity: increment }) => {
       await db.product.update({
-        data: { stock: {increment} },
+        data: { stock: { increment } },
         where: { id },
       });
-    }
+    }))
 
     await db.sale.delete({
       where: { id: params.saleId },
     });
+
     return redirect("/app/vendas");
   }
 

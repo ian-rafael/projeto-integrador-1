@@ -30,6 +30,7 @@ model Customer {
   address Json
 
   sales Sale[]
+  loans Loan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,6 +60,7 @@ model Product {
 
   purchaseItems ProductPurchase[]
   saleItems     ProductSale[]
+  loanItems     ProductLoan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,4 +129,34 @@ model SaleInstallment {
 enum StatusParcela {
   PAGO
   PENDENTE
+}
+
+model Loan {
+  id      String           @id @default(uuid())
+  dueDate DateTime
+  status  StatusEmprestimo @default(PENDENTE)
+
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   String
+  productItems ProductLoan[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusEmprestimo {
+  PENDENTE
+  DEVOLVIDO
+}
+
+model ProductLoan {
+  quantity  Int
+  unitPrice Float
+
+  loan      Loan    @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  loanId    String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  @@id([loanId, productId])
 }

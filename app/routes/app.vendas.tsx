@@ -43,7 +43,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     filters.customerId = customerId;
   }
 
-  const purchases = await db.sale.findMany({
+  const sales = await db.sale.findMany({
     select: {
       id: true,
       createdAt: true,
@@ -58,7 +58,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   });
 
   return json({
-    sales: purchases.map(({id, createdAt, customer, installments}) => ({
+    sales: sales.map(({id, createdAt, customer, installments}) => ({
       id,
       name: formatDate(createdAt) + " - " + customer.name,
       extra: {

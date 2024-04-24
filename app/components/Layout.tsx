@@ -29,6 +29,7 @@ function NavBar () {
         <NavListItem to="produtos">Produtos</NavListItem>
         <NavListItem to="clientes">Clientes</NavListItem>
         <NavListItem to="vendas">Vendas</NavListItem>
+        <NavListItem to="emprestimos">Empréstimos</NavListItem>
         <NavListItem to="fornecedores">Fornecedores</NavListItem>
         <NavListItem to="compras">Compras</NavListItem>
         <NavListItem to="usuarios">Usuários</NavListItem>
@@ -53,7 +54,7 @@ function Header ({username}: {username: string}) {
   return (
     <header
       className={clsx(
-        "bg-slate-100 w-full min-h-screen lg:w-80 grid gap-10 grid-rows-[auto_1fr_auto] py-4",
+        "bg-slate-100 w-full min-h-screen lg:w-80 grid gap-6 grid-rows-[auto_1fr_auto] py-4",
         isOpen ? "absolute z-20 lg:relative" : "hidden xl:grid",
       )}
     >
