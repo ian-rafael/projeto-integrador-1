@@ -1,5 +1,5 @@
-import { redirect, type ActionFunctionArgs } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { DateTime } from "luxon";
 import BackLink from "~/components/BackLink";
 import { Frame, FrameHeader } from "~/components/frame";
@@ -7,9 +7,67 @@ import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/com
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { $Enums } from "@prisma/client";
+
+function validateInstallmentQuantity (installmentQuantity: string) {
+  return !installmentQuantity
+    ? "Quantidade inválida"
+    : Number(installmentQuantity) < 1
+    ? "O mínimo de parcelas é 1"
+    : Number(installmentQuantity) > 12
+    ? "O máximo de parcelas é 12"
+    : undefined;
+}
+
+async function createSale ({
+  productItems,
+  installmentQuantity,
+  firstDueDate,
+  customerId,
+  loanId,
+}: {
+  productItems: { productId: string, quantity: number, unitPrice: number }[],
+  installmentQuantity: string,
+  firstDueDate: string,
+  customerId: string,
+  loanId?: string,
+},
+  shouldUpdateStock: boolean = true,
+) {
+  const total = productItems.reduce((acc, {quantity, unitPrice}) => acc + (unitPrice * quantity), 0);
+  const installments = [];
+  const value = total / Number(installmentQuantity);
+  for (let i = 0; i < Number(installmentQuantity); i++) {
+    const dueDate = DateTime.fromISO(firstDueDate).plus({ month: i }).toJSDate();
+    installments.push({ dueDate, value });
+  }
+
+  const sale = await db.sale.create({
+    data: {
+      customerId,
+      loanId,
+      productItems: { createMany: { data: productItems } },
+      installments: { createMany: { data: installments } },
+    },
+  });
+
+  if (shouldUpdateStock) {
+    await Promise.all(productItems.map(async ({productId: id, quantity: decrement}) => {
+      await db.product.update({
+        data: { stock: { decrement } },
+        where: { id },
+      });
+    }));
+  }
+
+  return sale;
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
+
+  const url = new URL(request.url);
+  const loanId = url.searchParams.get("loanId");
 
   const form = await request.formData();
   const customerId = form.get("customer[id]");
@@ -18,6 +76,93 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const productIds = form.getAll("product[id]");
   const quantities = form.getAll("quantity");
   const unitPrices = form.getAll("unitPrice");
+
+  if (loanId) {
+    const loan = await db.loan.findUniqueOrThrow({
+      select: {
+        productItems: true,
+        status: true,
+        customerId: true,
+        sale: { select: { id: true } },
+      },
+      where: { id: loanId }
+    });
+    if (loan.sale) {
+      return redirect("/app/vendas");
+    }
+    if (
+      typeof installmentQuantity !== "string"
+      || typeof firstDueDate !== "string"
+      || productIds.length === 0
+      || unitPrices.length !== productIds.length
+    ) {
+      return badRequest({
+        fields: null,
+        fieldErrors: null,
+        formError: "Form submitted incorrectly",
+      });
+    }
+
+    const productUnitPricesMap = Object.fromEntries(productIds.map((id, i) => [id, unitPrices[i]]));
+    const productItems = loan.productItems.map(({productId, quantity}) => ({
+      productId,
+      quantity,
+      unitPrice: Number(productUnitPricesMap[productId]),
+    }));
+
+    let quantitiesFieldErrors: (string|undefined)[] = [];
+    // Se foi devolvido verifica se tem no estoque.
+    // Se estiver pendente não é retirado do estoque na criação da venda
+    // portanto não precisa verificar o estoque.
+    if (loan.status === $Enums.StatusEmprestimo.DEVOLVIDO) {
+      const products = await db.product.findMany({
+        select: { id: true, stock: true },
+        where: { id: { in: productIds as string[] }},
+      });
+      const productsStockMap = Object.fromEntries(products.map(({id, stock}) => [id, stock]));
+      quantitiesFieldErrors = productItems.map(({productId, quantity}) =>
+        quantity > productsStockMap[productId]
+        ? `Quantidade maior do que estoque (${productsStockMap[productId]})`
+        : undefined
+      );
+    }
+    const fields = { installment_quantity: installmentQuantity, due_date: firstDueDate };
+    const fieldErrors = {
+      customer: !loan.customerId ? "Cliente é obrigatório" : undefined,
+      installmentQuantity: validateInstallmentQuantity(installmentQuantity),
+      dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
+      quantities: quantitiesFieldErrors,
+      products: [],
+    };
+    if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
+      return badRequest({
+        fields,
+        fieldErrors,
+        formError: null,
+      });
+    }
+
+    // Criação
+    if (loan.status === $Enums.StatusEmprestimo.PENDENTE) {
+      await db.loan.update({
+        data: { status: $Enums.StatusEmprestimo.DEVOLVIDO },
+        where: { id: loanId },
+      });    
+    }
+
+    const sale = await createSale(
+      {
+        customerId: loan.customerId,
+        firstDueDate,
+        installmentQuantity,
+        productItems,
+        loanId,
+      },
+      loan.status === $Enums.StatusEmprestimo.DEVOLVIDO
+    );
+
+    return redirect("/app/vendas/" + sale.id);
+  }
 
   if (
     typeof customerId !== "string"
@@ -47,14 +192,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { customer: customerId, installment_quantity: installmentQuantity, due_date: firstDueDate };
   const fieldErrors = {
-    customer: customerId.length < 1 ? "Cliente é obrigatório" : undefined,
-    installmentQuantity: !installmentQuantity
-      ? "Quantidade inválida"
-      : Number(installmentQuantity) < 1
-      ? "O mínimo de parcelas é 1"
-      : Number(installmentQuantity) > 12
-      ? "O máximo de parcelas é 12"
-      : undefined,
+    customer: !customerId ? "Cliente é obrigatório" : undefined,
+    installmentQuantity: validateInstallmentQuantity(installmentQuantity),
     dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
     // slice para não aparecer o texto em dois inputs diferentes
     products: productIds.map((value, i) => productIds.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
@@ -72,44 +211,52 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-  const total = productItems.reduce((acc, {quantity, unitPrice}) => {
-    return acc + (unitPrice * quantity);
-  }, 0);
-
-  const installments = [];
-  const value = total / Number(installmentQuantity);
-  for (let i = 0; i < Number(installmentQuantity); i++) {
-    const dueDate = DateTime.fromISO(firstDueDate).plus({ month: i }).toJSDate();
-    installments.push({ dueDate, value });
-  }
-
-  const sale = await db.sale.create({
-    data: {
-      customerId: customerId,
-      productItems: {
-        createMany: {
-          data: productItems,
-        },
-      },
-      installments: {
-        createMany: {
-          data: installments,
-        },
-      },
-    },
+  // Criação
+  const sale = await createSale({
+    customerId,
+    firstDueDate,
+    installmentQuantity,
+    productItems,
   });
-
-  await Promise.all(productItems.map(async ({productId: id, quantity: decrement}) => {
-    await db.product.update({
-      data: { stock: { decrement } },
-      where: { id },
-    });
-  }));
 
   return redirect("/app/vendas/" + sale.id);
 };
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await requireUserId(request);
+
+  const url = new URL(request.url);
+  const loanId = url.searchParams.get("loanId");
+  let loan = null;
+  if (loanId) {
+    const loanInfo = await db.loan.findUniqueOrThrow({
+      select: {
+        customer: { select: { name: true } },
+        sale: { select: { id: true } },
+        productItems: { select: { productId: true, quantity: true, product: { select: { name: true } } }},
+      },
+      where: { id: loanId },
+    });
+    if (loanInfo.sale) {
+      return redirect("/app/vendas");
+    }
+    if (loanInfo) {
+      loan = {
+        customerName: loanInfo.customer.name,
+        productItems: loanInfo.productItems.map(({product: { name }, productId, quantity}) => ({
+          productId,
+          productName: name,
+          quantity,
+        })),
+      };
+    }
+  }
+
+  return json({ loan });
+};
+
 export default function SaleCreate () {
+  const { loan } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   return (
     <Frame>
@@ -118,14 +265,23 @@ export default function SaleCreate () {
         <h3>Nova venda</h3>
       </FrameHeader>
       <Form method="post">
-        <ComboBox
-          attr={['customer']}
-          errorMessage={actionData?.fieldErrors?.customer}
-          label="Cliente"
-          required={true}
-          url="/app/clientes-search"
-        />
-        <div className="grid grid-cols-2 gap-1">
+        {loan ? (
+          <div className="flex flex-col mb-2">
+            <span>Cliente</span>
+            <div className="p-2 flex-1 flex items-center">
+              <b>{loan.customerName}</b>
+            </div>
+          </div>
+        ) : (
+          <ComboBox
+            attr={['customer']}
+            errorMessage={actionData?.fieldErrors?.customer}
+            label="Cliente"
+            required={true}
+            url="/app/clientes-search"
+          />
+        )}
+        <div className="grid grid-cols-2 gap-1 items-end">
           <div>
             <Input
               attr={['installment_quantity']}
@@ -149,36 +305,64 @@ export default function SaleCreate () {
             />
           </div>
         </div>
-        <FormArray defaultLength={1}>
-          {(i) => (
-            <div className="grid grid-cols-3 gap-1">
-              <ComboBox
-                attr={['product']}
-                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-                label="Produto"
-                required={true}
-                url="/app/produtos-search"
-              />
-              <Input
-                attr={['quantity']}
-                defaultValue={1}
-                label="Quantidade"
-                errorMessage={actionData?.fieldErrors?.quantities[i] || undefined}
-                min={1}
-                required={true}
-                type="number"
-              />
-              <Input
-                attr={['unitPrice']}
-                label="Preço unitário"
-                min={0}
-                required={true}
-                step=".01"
-                type="number"
-              />
-            </div>
-          )}
-        </FormArray>
+        {loan ? (
+          <div>
+            {loan.productItems.map(({productId, productName, quantity}) => (
+              <div className="grid grid-cols-3 gap-1" key={productId}>
+                <div className="flex flex-col mb-2">
+                  <span>Produto</span>
+                  <div className="p-2 flex-1 flex items-center">
+                    <b title={productName} className="truncate">{productName}</b>
+                  </div>
+                  <input type="hidden" name="product[id]" value={productId}/>
+                </div>
+                <div className="flex flex-col mb-2">
+                  <span>Quantidade</span>
+                  <div className="p-2 flex-1 flex items-center">x {quantity}</div>
+                </div>
+                <Input
+                  attr={['unitPrice']}
+                  label="Preço unitário"
+                  min={0}
+                  required={true}
+                  step=".01"
+                  type="number"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <FormArray defaultLength={1}>
+            {(i) => (
+              <div className="grid grid-cols-3 gap-1">
+                <ComboBox
+                  attr={['product']}
+                  errorMessage={actionData?.fieldErrors?.products[i] || undefined}
+                  label="Produto"
+                  required={true}
+                  url="/app/produtos-search"
+                />
+                <Input
+                  attr={['quantity']}
+                  defaultValue={1}
+                  label="Quantidade"
+                  errorMessage={actionData?.fieldErrors?.quantities[i] || undefined}
+                  min={1}
+                  required={true}
+                  type="number"
+                />
+                <Input
+                  attr={['unitPrice']}
+                  label="Preço unitário"
+                  min={0}
+                  required={true}
+                  step=".01"
+                  type="number"
+                />
+              </div>
+            )}
+          </FormArray>
+        )}
         {actionData?.formError ? (
           <ValidationError>
             {actionData.formError}

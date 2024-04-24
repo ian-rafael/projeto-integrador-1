@@ -23,6 +23,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       createdAt: true,
       customer: { select: { id: true, name: true } },
       id: true,
+      loanId: true,
       productItems: {
         select: {
           product: { select: { name: true } },
@@ -48,6 +49,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       createdAt: sale.createdAt,
       customerId: sale.customer.id,
       customerName: sale.customer.name,
+      loanId: sale.loanId,
       installments: sale.installments.map((data, index) => ({
         ...data,
         paid: data.status === $Enums.StatusParcela.PAGO,
@@ -185,6 +187,16 @@ export default function SaleView () {
             rows={sale.installments}
           />
         </Item>
+        {sale.loanId && (
+          <Item title="Empréstimo">
+            <Link
+              to={`/app/emprestimos/${sale.loanId}`}
+              className="text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
+              #{sale.loanId}
+            </Link>
+          </Item>
+        )}
       </List>
       <Actions/>
     </Frame>

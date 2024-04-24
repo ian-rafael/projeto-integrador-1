@@ -95,6 +95,8 @@ model Sale {
 
   customer     Customer          @relation(fields: [customerId], references: [id])
   customerId   String
+  loan         Loan?             @relation(fields: [loanId], references: [id])
+  loanId       String?           @unique
   productItems ProductSale[]
   installments SaleInstallment[]
 
@@ -136,6 +138,7 @@ model Loan {
   dueDate DateTime
   status  StatusEmprestimo @default(PENDENTE)
 
+  sale         Sale?
   customer     Customer      @relation(fields: [customerId], references: [id])
   customerId   String
   productItems ProductLoan[]

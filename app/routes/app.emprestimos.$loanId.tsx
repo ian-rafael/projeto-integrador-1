@@ -26,10 +26,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       where: { id: params.loanId },
     });
 
+    // Mesmo que o empréstimo tivesse uma venda, daria pra deletar (ON DELETE SET NULL),
+    // mas quando cria uma venda, o emprestimo é setado pra DEVOLVIDO
+    // então cai na condição abaixo
     if (loan.status === $Enums.StatusEmprestimo.DEVOLVIDO) {
       return badRequest({ formError: "Erro ao deletar: Esse registro já foi devolvido" });
     }
 
+    // Seria bom botar a condição abaixo pra deixar explicito que só deve
+    // retornar pro estoque caso esteja pendente. Mas tanto faz
     // if (loan.status === $Enums.StatusEmprestimo.PENDENTE) { }
     const productItems = await db.productLoan.findMany({
       where: { loanId: params.loanId },
@@ -62,6 +67,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       createdAt: true,
       dueDate: true,
       customer: { select: { id: true, name: true } },
+      sale: { select: { id: true } },
       id: true,
       status: true,
       productItems: {
@@ -87,6 +93,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       dueDate: loan.dueDate,
       customerId: loan.customer.id,
       customerName: loan.customer.name,
+      saleId: loan.sale?.id,
       status: loan.status,
       productItems: loan.productItems.map((data) => ({
         productName: data.product.name,
@@ -157,10 +164,24 @@ export default function LoanView () {
             idKey="productId"
           />
         </Item>
+        <Item title="Venda">
+          {loan.saleId ? (
+            <Link
+              to={`/app/vendas/${loan.saleId}`}
+              className="text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
+              #{loan.saleId}
+            </Link>
+          ) : (
+            <Link
+              to={`/app/vendas/create?loanId=${loan.id}`}
+              className="text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
+              Criar venda
+            </Link>
+          )}
+        </Item>
       </List>
-      <Link to={`/app/vendas/create?loanId=${loan.id}`}>
-        Criar venda
-      </Link>
       <Actions/>
     </Frame>
   );
