@@ -145,9 +145,10 @@ export default function Sales () {
           <Input
             attr={['none']}
             value={undefined}
+            defaultChecked={!searchParams.get('status')}
             name="status"
             type="radio"
-            label=""
+            label="Todos"
           />
           <Input
             attr={['paid']}
