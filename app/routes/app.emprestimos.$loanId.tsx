@@ -5,13 +5,12 @@ import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 import { useEffect } from "react";
-import { $Enums } from "@prisma/client";
 import { formatDate, formatDateHour } from "~/utils/formatters";
 import Tag from "~/components/Tag";
 import { Actions, Item, List, Table } from "~/components/view";
 import { Frame, FrameHeader } from "~/components/frame";
 import BackLink from "~/components/BackLink";
-import { ProductItemReceiveForm } from "./app.emprestimos.$loanId.receive-items";
+import { ProductItemReceiveForm } from "./app.emprestimos.$loanId.return-item.$productId";
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -23,19 +22,27 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   if (intent === "delete") {
     const loan = await db.loan.findUniqueOrThrow({
+      select: {
+        sale: { select: { id: true } },
+        productItems: {
+          select: { productId: true },
+          where: { returnedQuantity: { gt: 0 } },
+        },
+      },
       where: { id: params.loanId },
     });
 
-    // Mesmo que o empréstimo tivesse uma venda, daria pra deletar (ON DELETE SET NULL),
-    // mas quando cria uma venda, o emprestimo é setado pra DEVOLVIDO
-    // então cai na condição abaixo
-    if (loan.status === $Enums.StatusEmprestimo.DEVOLVIDO) {
-      return badRequest({ formError: "Erro ao deletar: Esse registro já foi devolvido" });
+    if (loan.sale) {
+      return badRequest({ formError: "Erro ao deletar: Há uma venda a partir desse registro" });
     }
 
-    // Seria bom botar a condição abaixo pra deixar explicito que só deve
-    // retornar pro estoque caso esteja pendente. Mas tanto faz
-    // if (loan.status === $Enums.StatusEmprestimo.PENDENTE) { }
+    if (loan.productItems.length > 0) {
+      return badRequest({ formError: "Erro ao deletar: Há produtos devolvidos nesse registro" });
+    }
+
+    // Se não tiver uma venda e não tiver itens devolvidos
+    // 1. Retorna os itens pro estoque
+    // 2. Deleta o registro
     const productItems = await db.productLoan.findMany({
       where: { loanId: params.loanId },
     });
@@ -69,12 +76,12 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       customer: { select: { id: true, name: true } },
       sale: { select: { id: true } },
       id: true,
-      status: true,
       productItems: {
         select: {
           product: { select: { name: true } },
           productId: true,
           quantity: true,
+          returnedQuantity: true,
           unitPrice: true,
         }
       },
@@ -94,11 +101,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       customerId: loan.customer.id,
       customerName: loan.customer.name,
       saleId: loan.sale?.id,
-      status: loan.status,
       productItems: loan.productItems.map((data) => ({
         productName: data.product.name,
         productId: data.productId,
         quantity: data.quantity,
+        returnedQuantity: data.returnedQuantity,
         unitPrice: data.unitPrice,
       })),
     },
@@ -115,6 +122,7 @@ export default function LoanView () {
     }
   }, [actionData]);
 
+  const hasNotReturnedItems = loan.productItems.some(({quantity, returnedQuantity}) => returnedQuantity < quantity);
   return (
     <Frame>
       <FrameHeader>
@@ -137,10 +145,6 @@ export default function LoanView () {
         <Item title="Criado em">
           {formatDateHour(loan.createdAt)}
         </Item>
-        <Item title="Status">
-          {loan.status === $Enums.StatusEmprestimo.PENDENTE ? "Pendente" : "Devolvido"}
-          {loan.status === $Enums.StatusEmprestimo.PENDENTE && <ProductItemReceiveForm loanId={loan.id}/>}
-        </Item>
         <Item title="Produtos">
           <Table
             cols={[
@@ -155,32 +159,57 @@ export default function LoanView () {
                 type: 'text',
               },
               {
+                label: 'Devolvido',
+                property: 'returnedQuantity',
+                type: 'text',
+              },
+              {
                 label: 'Preço unit.',
                 property: 'unitPrice',
                 type: 'currency',
+              },
+              {
+                label: 'Receber',
+                property: 'receive',
+                type: 'render',
+                renderData: (data) => {
+                  const maxQuantity = data.quantity - data.returnedQuantity;
+                  if (maxQuantity <= 0) return null;
+                  if (loan.saleId) return null;
+                  return (
+                    <ProductItemReceiveForm
+                      loanId={loan.id}
+                      maxQuantity={maxQuantity}
+                      productId={data.productId}
+                    />
+                  );
+                },
               },
             ]}
             rows={loan.productItems}
             idKey="productId"
           />
         </Item>
-        <Item title="Venda">
-          {loan.saleId ? (
-            <Link
-              to={`/app/vendas/${loan.saleId}`}
-              className="text-blue-600 hover:underline inline-flex items-center gap-1"
-            >
-              #{loan.saleId}
-            </Link>
-          ) : (
-            <Link
-              to={`/app/vendas/create?loanId=${loan.id}`}
-              className="text-blue-600 hover:underline inline-flex items-center gap-1"
-            >
-              Criar venda
-            </Link>
-          )}
-        </Item>
+        {loan.saleId || hasNotReturnedItems ? (
+          <Item title="Venda">
+            {loan.saleId ? (
+              <Link
+                to={`/app/vendas/${loan.saleId}`}
+                className="text-blue-600 hover:underline inline-flex items-center gap-1"
+              >
+                #{loan.saleId}
+              </Link>
+            ) : null}
+            {!loan.saleId && hasNotReturnedItems ? (
+              <Link
+                to={`/app/vendas/create?loanId=${loan.id}`}
+                className="text-blue-600 hover:underline inline-flex items-center gap-1"
+              >
+                Criar venda
+              </Link>
+            ) : null}
+          </Item>
+        ) : null}
       </List>
       <Actions/>
     </Frame>

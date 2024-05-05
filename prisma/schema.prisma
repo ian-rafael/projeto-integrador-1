@@ -134,9 +134,8 @@ enum StatusParcela {
 }
 
 model Loan {
-  id      String           @id @default(uuid())
+  id      String   @id @default(uuid())
   dueDate DateTime
-  status  StatusEmprestimo @default(PENDENTE)
 
   sale         Sale?
   customer     Customer      @relation(fields: [customerId], references: [id])
@@ -147,14 +146,10 @@ model Loan {
   updatedAt DateTime @updatedAt
 }
 
-enum StatusEmprestimo {
-  PENDENTE
-  DEVOLVIDO
-}
-
 model ProductLoan {
-  quantity  Int
-  unitPrice Float
+  quantity         Int
+  returnedQuantity Int   @default(0)
+  unitPrice        Float
 
   loan      Loan    @relation(fields: [loanId], references: [id], onDelete: Cascade)
   loanId    String

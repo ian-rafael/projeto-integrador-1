@@ -7,7 +7,6 @@ import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/com
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-import { $Enums } from "@prisma/client";
 
 function validateInstallmentQuantity (installmentQuantity: string) {
   return !installmentQuantity
@@ -31,9 +30,7 @@ async function createSale ({
   firstDueDate: string,
   customerId: string,
   loanId?: string,
-},
-  shouldUpdateStock: boolean = true,
-) {
+}) {
   const total = productItems.reduce((acc, {quantity, unitPrice}) => acc + (unitPrice * quantity), 0);
   const installments = [];
   const value = total / Number(installmentQuantity);
@@ -42,7 +39,7 @@ async function createSale ({
     installments.push({ dueDate, value });
   }
 
-  const sale = await db.sale.create({
+  return db.sale.create({
     data: {
       customerId,
       loanId,
@@ -50,17 +47,6 @@ async function createSale ({
       installments: { createMany: { data: installments } },
     },
   });
-
-  if (shouldUpdateStock) {
-    await Promise.all(productItems.map(async ({productId: id, quantity: decrement}) => {
-      await db.product.update({
-        data: { stock: { decrement } },
-        where: { id },
-      });
-    }));
-  }
-
-  return sale;
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -80,16 +66,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (loanId) {
     const loan = await db.loan.findUniqueOrThrow({
       select: {
-        productItems: true,
-        status: true,
+        productItems: {
+          where: { returnedQuantity: { lt: db.productLoan.fields.quantity } },
+        },
         customerId: true,
         sale: { select: { id: true } },
       },
       where: { id: loanId }
     });
-    if (loan.sale) {
+    if (loan.sale || (loan.productItems.length === 0)) {
       return redirect("/app/vendas");
     }
+
     if (
       typeof installmentQuantity !== "string"
       || typeof firstDueDate !== "string"
@@ -103,35 +91,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       });
     }
 
-    const productUnitPricesMap = Object.fromEntries(productIds.map((id, i) => [id, unitPrices[i]]));
-    const productItems = loan.productItems.map(({productId, quantity}) => ({
-      productId,
-      quantity,
-      unitPrice: Number(productUnitPricesMap[productId]),
-    }));
-
-    let quantitiesFieldErrors: (string|undefined)[] = [];
-    // Se foi devolvido verifica se tem no estoque.
-    // Se estiver pendente não é retirado do estoque na criação da venda
-    // portanto não precisa verificar o estoque.
-    if (loan.status === $Enums.StatusEmprestimo.DEVOLVIDO) {
-      const products = await db.product.findMany({
-        select: { id: true, stock: true },
-        where: { id: { in: productIds as string[] }},
-      });
-      const productsStockMap = Object.fromEntries(products.map(({id, stock}) => [id, stock]));
-      quantitiesFieldErrors = productItems.map(({productId, quantity}) =>
-        quantity > productsStockMap[productId]
-        ? `Quantidade maior do que estoque (${productsStockMap[productId]})`
-        : undefined
-      );
-    }
     const fields = { installment_quantity: installmentQuantity, due_date: firstDueDate };
     const fieldErrors = {
       customer: !loan.customerId ? "Cliente é obrigatório" : undefined,
       installmentQuantity: validateInstallmentQuantity(installmentQuantity),
       dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
-      quantities: quantitiesFieldErrors,
+      quantities: [],
       products: [],
     };
     if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
@@ -142,24 +107,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       });
     }
 
-    // Criação
-    if (loan.status === $Enums.StatusEmprestimo.PENDENTE) {
-      await db.loan.update({
-        data: { status: $Enums.StatusEmprestimo.DEVOLVIDO },
-        where: { id: loanId },
-      });    
-    }
-
-    const sale = await createSale(
-      {
-        customerId: loan.customerId,
-        firstDueDate,
-        installmentQuantity,
-        productItems,
-        loanId,
-      },
-      loan.status === $Enums.StatusEmprestimo.DEVOLVIDO
-    );
+    const productUnitPricesMap = Object.fromEntries(productIds.map((id, i) => [id, unitPrices[i]]));
+    const productItems = loan.productItems.map(({productId, quantity, returnedQuantity}) => ({
+      productId,
+      quantity: quantity - returnedQuantity,
+      unitPrice: Number(productUnitPricesMap[productId]),
+    }));
+    const sale = await createSale({
+      customerId: loan.customerId,
+      productItems,
+      firstDueDate,
+      installmentQuantity,
+      loanId,
+    });
 
     return redirect("/app/vendas/" + sale.id);
   }
@@ -218,6 +178,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     installmentQuantity,
     productItems,
   });
+  await Promise.all(productItems.map(async ({productId: id, quantity: decrement}) => {
+    await db.product.update({
+      data: { stock: { decrement } },
+      where: { id },
+    });
+  }));
 
   return redirect("/app/vendas/" + sale.id);
 };
@@ -233,23 +199,29 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       select: {
         customer: { select: { name: true } },
         sale: { select: { id: true } },
-        productItems: { select: { productId: true, quantity: true, product: { select: { name: true } } }},
+        productItems: {
+          select: {
+            productId: true,
+            quantity: true,
+            returnedQuantity: true,
+            product: { select: { name: true } },
+          },
+          where: { returnedQuantity: { lt: db.productLoan.fields.quantity } },
+        },
       },
       where: { id: loanId },
     });
-    if (loanInfo.sale) {
+    if (loanInfo.sale || (loanInfo.productItems.length === 0)) {
       return redirect("/app/vendas");
     }
-    if (loanInfo) {
-      loan = {
-        customerName: loanInfo.customer.name,
-        productItems: loanInfo.productItems.map(({product: { name }, productId, quantity}) => ({
-          productId,
-          productName: name,
-          quantity,
-        })),
-      };
-    }
+    loan = {
+      customerName: loanInfo.customer.name,
+      productItems: loanInfo.productItems.map((data) => ({
+        productId: data.productId,
+        productName: data.product.name,
+        quantity: data.quantity - data.returnedQuantity,
+      })),
+    };
   }
 
   return json({ loan });

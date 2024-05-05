@@ -14,6 +14,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       createdAt: true,
       customer: { select: { name: true } },
     },
+    orderBy: { createdAt: "desc" },
   });
 
   return json({

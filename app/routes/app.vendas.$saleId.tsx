@@ -74,17 +74,25 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const intent = form.get("intent");
 
   if (intent === "delete") {
-    const count = await db.saleInstallment.count({
-      where: {
-        saleId: params.saleId,
-        status: $Enums.StatusParcela.PAGO,
+    const sale = await db.sale.findUniqueOrThrow({
+      select: {
+        loanId: true,
+        _count: {
+          select: {
+            installments: {
+              where: { status: $Enums.StatusParcela.PAGO },
+            },
+          },
+        },
       },
+      where: { id: params.saleId },
     });
 
-    if (count > 0) {
-      return badRequest({
-        formError: "Erro ao deletar: Esse registro possui parcelas pagas",
-      });
+    if (sale.loanId) {
+      return badRequest({ formError: "Erro ao deletar: venda feita a partir de um empréstimo" });
+    }
+    if (sale._count.installments > 0) {
+      return badRequest({ formError: "Erro ao deletar: Esse registro possui parcelas pagas" });
     }
 
     const productItems = await db.productSale.findMany({

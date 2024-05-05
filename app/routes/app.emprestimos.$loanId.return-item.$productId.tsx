@@ -10,7 +10,7 @@ import { requireUserId } from "~/utils/session.server";
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.purchaseId, "params.purchaseId is required");
+  invariant(params.loanId, "params.loanId is required");
   invariant(params.productId, "params.productId is required");
 
   const form = await request.formData();
@@ -23,10 +23,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return badRequest({ error: "Form submitted incorrectly" });
   }
 
-  const record = await db.productPurchase.findUnique({
+  const record = await db.productLoan.findUnique({
+    select: {
+      quantity: true,
+      returnedQuantity: true,
+      loan: { select: { sale: { select: { id: true } } } },
+    },
     where: {
-      purchaseId_productId: {
-        purchaseId: params.purchaseId,
+      loanId_productId: {
+        loanId: params.loanId,
         productId: params.productId,
       },
     },
@@ -36,19 +41,23 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return json({error: "Record not found"}, { status: 404 });
   }
 
-  if (parseInt(quantity) > (record.quantity - record.receivedQuantity)) {
-    return badRequest({ error: "Quantidade maior que o permitido" });
+  if (record.loan.sale) {
+    return badRequest({ error: "Empréstimo fechado. A venda já foi realizada!" });
   }
 
-  await db.productPurchase.update({
+  if (parseInt(quantity) > (record.quantity - record.returnedQuantity)) {
+    return badRequest({ error: "Quantidade maior que o permitido!" });
+  }
+
+  await db.productLoan.update({
     where: {
-      purchaseId_productId: {
+      loanId_productId: {
+        loanId: params.loanId,
         productId: params.productId,
-        purchaseId: params.purchaseId,
       },
     },
     data: {
-      receivedQuantity: {
+      returnedQuantity: {
         increment: parseInt(quantity),
       },
       product: {
@@ -64,11 +73,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return json({ ok: true });
 };
 
-export function ProductItemReceiveForm ({purchaseId, productId, maxQuantity}: {purchaseId: string, productId: string, maxQuantity: number}) {
+export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanId: string, productId: string, maxQuantity: number}) {
   const fetcher = useFetcher<typeof action>();
   const isUpdating = fetcher.state !== "idle";
   const isSubmitting = fetcher.state === "submitting";
-  const actionUrl = "/app/compras/" + purchaseId + "/receive-item/" + productId;
+  const actionUrl = "/app/emprestimos/" + loanId + "/return-item/" + productId;
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
