@@ -82,7 +82,7 @@ yarn prisma db seed
 - [ ] ?? Manter filtros ao entrar no registro.
 - [X] Vendas: filtro TODOS.
 - [X] Compra: Pendente / Entregue na lista e Filtro.
-- [ ] Empréstimo: filtro Status, Cliente; Status na listagem.
+- [X] Empréstimo: filtro Status, Cliente; Status na listagem.
 - [X] Empréstimo: Bloquear venda quando já todos itens devolvidos.
 - [X] Empréstimo: Para cada item input-number pra devolver.
 - [X] Empréstimo: Na venda só os que não foram devolvidos.

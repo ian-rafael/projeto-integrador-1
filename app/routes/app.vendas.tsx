@@ -6,6 +6,7 @@ import Index from "~/components/Index";
 import { ComboBox, Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { formatDate } from "~/utils/formatters";
+import { getStartOfDay } from "~/utils/helper";
 import { requireUserId } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -27,7 +28,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         filters.installments = {
           some: {
             status: $Enums.StatusParcela.PENDENTE,
-            dueDate: { lt: new Date() },
+            dueDate: { lt: getStartOfDay(Date.now()) },
           },
         };
         break;
@@ -63,7 +64,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       name: formatDate(createdAt) + " - " + customer.name,
       extra: {
         pendingInstallmentsCount: installments.length,
-        lateInstallmentsCount: installments.filter(({dueDate}) => dueDate.getTime() < Date.now()).length,
+        lateInstallmentsCount: installments.filter(({dueDate}) => {
+          return getStartOfDay(dueDate) < getStartOfDay(Date.now());
+        }).length,
       },
     })),
     searchFiltersCount: Object.keys(filters).length,
