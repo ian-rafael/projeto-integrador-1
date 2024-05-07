@@ -13,7 +13,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   invariant(typeof term === "string", "Term is required");
 
   const products = await db.product.findMany({
-    select: { id: true, name: true },
+    select: { id: true, name: true, stock: true, price: true },
     where: {
       name: {
         contains: escapeFilterString(term),
@@ -21,10 +21,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
     },
     take: 20,
+    orderBy: [
+      { stock: "desc" },
+      { name: "asc" },
+    ],
   });
 
-  return json(products.map((data) => ({
-    id: data.id,
-    label: data.name,
+  return json(products.map(({id, name: label, ...extra}) => ({
+    id,
+    label,
+    extra,
   })));
 };

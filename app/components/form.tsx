@@ -30,7 +30,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   label: string;
 }
 
-type Option = {
+export type Option = {
   id: string | number;
   label: string;
 };
@@ -306,23 +306,27 @@ export function FormArray ({ children, defaultLength = 0 }: FormArrayProps) {
   );
 }
 
-type ComboBoxProps = {
+interface ComboBoxProps <TOption> {
   attr: string[];
-  defaultValue?: Option;
+  defaultValue?: TOption;
   errorMessage?: string;
   label: string;
+  onChange?: (value: TOption | null) => void;
+  renderOption?: (option: TOption) => React.ReactNode;
   required?: boolean;
   url: string;
-};
+}
 
-export function ComboBox ({
+export function ComboBox <TOption extends Option>({
   attr,
   defaultValue,
   errorMessage,
   label,
+  onChange,
+  renderOption,
   required,
   url,
-}: ComboBoxProps) {
+}: ComboBoxProps<TOption>) {
   const fetcher = useFetcher<Option[]>();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const {name, errorId} = useInputAttr(attr);
@@ -338,6 +342,11 @@ export function ComboBox ({
 
   useEffect(() => {
     load('');
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -346,6 +355,7 @@ export function ComboBox ({
       as={Container}
       className="relative"
       defaultValue={defaultValue}
+      onChange={onChange}
       errorId={errorId}
       errorMessage={errorMessage}
       name={name}
@@ -372,14 +382,16 @@ export function ComboBox ({
           </Combobox.Button>
         </span>
       </div>
-      <Combobox.Options className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-auto">
+      <Combobox.Options className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-y-auto">
         {fetcher.data?.map((option) => (
           <Combobox.Option
-            className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1"
+            className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1 overflow-x-hidden"
             key={option.id}
             value={option}
           >
-            {option.label}
+            {typeof renderOption === "function"
+              ? renderOption(option as unknown as TOption)
+              : option.label}
           </Combobox.Option>
         ))}
       </Combobox.Options>

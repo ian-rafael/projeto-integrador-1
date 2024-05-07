@@ -86,4 +86,4 @@ yarn prisma db seed
 - [X] Empréstimo: Bloquear venda quando já todos itens devolvidos.
 - [X] Empréstimo: Para cada item input-number pra devolver.
 - [X] Empréstimo: Na venda só os que não foram devolvidos.
-- [ ] Venda: Auto preencher Preço unitário do produto.
+- [X] Venda: Auto preencher Preço unitário do produto.

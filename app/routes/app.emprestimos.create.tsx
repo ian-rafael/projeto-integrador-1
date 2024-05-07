@@ -7,6 +7,7 @@ import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { DateTime } from "luxon";
+import ProductItem from "~/components/ProductItem";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -110,32 +111,12 @@ export default function LoanCreate () {
         />
         <FormArray defaultLength={1}>
           {(i) => (
-            <div className="grid grid-cols-3 gap-1">
-              <ComboBox
-                attr={['product']}
-                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
-                label="Produto"
-                required={true}
-                url="/app/produtos-search"
-              />
-              <Input
-                attr={['quantity']}
-                defaultValue={1}
-                label="Quantidade"
-                errorMessage={actionData?.fieldErrors?.quantities[i] || undefined}
-                min={1}
-                required={true}
-                type="number"
-              />
-              <Input
-                attr={['unitPrice']}
-                label="Preço unitário"
-                min={0}
-                required={true}
-                step=".01"
-                type="number"
-              />
-            </div>
+            <ProductItem
+              errorMessages={{
+                product: actionData?.fieldErrors?.products[i] || undefined,
+                quantity: actionData?.fieldErrors?.quantities[i] || undefined,
+              }}
+            />
           )}
         </FormArray>
         {actionData?.formError ? (
