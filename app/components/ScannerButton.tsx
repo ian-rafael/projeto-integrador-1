@@ -21,7 +21,7 @@ function ScannerButton ({ className, onResult }: { className?: string, onResult:
       >
         <CameraIcon/>
       </button>
-      <Modal className="open:flex flex-col" open={isOpen}>
+      <Modal className="open:grid grid-rows-[auto_1fr]" open={isOpen}>
         <header className="mb-1 flex justify-between text-xl">
           <span>Escaneie o código de barras</span>
           <button
@@ -32,16 +32,14 @@ function ScannerButton ({ className, onResult }: { className?: string, onResult:
             <Cross1Icon/>
           </button>
         </header>
-        <div className="flex-1 flex">
-          <ClientOnly>
-            {() => (
-              <Scanner
-                paused={!isOpen}
-                onResult={onScannerResult}
-              />
-            )}
-          </ClientOnly>
-        </div>
+        <ClientOnly>
+          {() => (
+            <Scanner
+              paused={!isOpen}
+              onResult={onScannerResult}
+            />
+          )}
+        </ClientOnly>
       </Modal>
     </>
   );
