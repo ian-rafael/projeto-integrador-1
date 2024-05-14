@@ -91,7 +91,10 @@ function Container ({
   );
 }
 
-const inputClassNames = "w-full p-2 shadow-sm rounded-sm";
+const inputClassNames = "w-full h-11 p-2 bg-white shadow-sm rounded-sm";
+const inputElementClassNames = "absolute inset-y-0 px-2 grid place-items-center text-slate-500";
+const appendElementClassNames = clsx(inputElementClassNames, "right-0");
+const prependElementClassNames = clsx(inputElementClassNames, "left-0");
 
 export function Input ({ appendElement, label, attr, errorMessage, ...inputProps }: InputProps) {
   const {id, name, htmlFor, errorId} = useInputAttr(attr);
@@ -114,7 +117,7 @@ export function Input ({ appendElement, label, attr, errorMessage, ...inputProps
           {...inputProps}
         />
         {appendElement && (
-          <span className="absolute right-0 inset-y-0 w-7 grid place-items-center">
+          <span className={appendElementClassNames}>
             {appendElement}
           </span>
         )}
@@ -133,7 +136,7 @@ export function Textarea ({ label, attr, errorMessage, ...inputProps }: Textarea
       errorMessage={errorMessage}
     >
       <textarea
-        className={clsx(inputClassNames, "resize-y")}
+        className={clsx(inputClassNames, "h-auto", "resize-y")}
         id={id}
         name={name}
         aria-invalid={Boolean(errorMessage)}
@@ -307,6 +310,7 @@ export function FormArray ({ children, defaultLength = 0 }: FormArrayProps) {
 }
 
 interface ComboBoxProps <TOption> {
+  appendElement?: React.ReactNode;
   attr: string[];
   defaultValue?: TOption;
   errorMessage?: string;
@@ -315,9 +319,11 @@ interface ComboBoxProps <TOption> {
   renderOption?: (option: TOption) => React.ReactNode;
   required?: boolean;
   url: string;
+  value?: TOption | null;
 }
 
 export function ComboBox <TOption extends Option>({
+  appendElement,
   attr,
   defaultValue,
   errorMessage,
@@ -326,6 +332,7 @@ export function ComboBox <TOption extends Option>({
   renderOption,
   required,
   url,
+  value,
 }: ComboBoxProps<TOption>) {
   const fetcher = useFetcher<Option[]>();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -353,48 +360,49 @@ export function ComboBox <TOption extends Option>({
   return (    
     <Combobox
       as={Container}
-      className="relative"
       defaultValue={defaultValue}
-      onChange={onChange}
       errorId={errorId}
       errorMessage={errorMessage}
       name={name}
       nullable={true}
+      onChange={onChange}
+      value={value}
     >
       <Combobox.Label>{label}</Combobox.Label>
       <div className="relative">
-        <span className="absolute inset-y-0 left-0 px-1 w-7 grid place-items-center opacity-15">
+        <span className={prependElementClassNames}>
           <MagnifyingGlassIcon/>
         </span>
         <Combobox.Input
           aria-errormessage={errorMessage ? errorId : undefined}
           aria-invalid={Boolean(errorMessage)}
           autoComplete="off"
-          className={clsx(inputClassNames, 'px-7')}
+          className={clsx(inputClassNames, 'pl-8', appendElement ? 'pr-14' :'pr-8')}
           displayValue={(option: Option) => option ? option.label : ''}
           onBlur={() => load('')}
           onChange={(e) => load(e.target.value)}
           required={required}
         />
-        <span className="absolute right-0 inset-y-0 w-7 grid place-items-center">
+        <span className={clsx(appendElementClassNames, appendElement && "grid-cols-2 gap-2")}>
+          {appendElement}
           <Combobox.Button>
             <CaretSortIcon/>
           </Combobox.Button>
         </span>
+        <Combobox.Options className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-y-auto">
+          {fetcher.data?.map((option) => (
+            <Combobox.Option
+              className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1 overflow-x-hidden"
+              key={option.id}
+              value={option}
+            >
+              {typeof renderOption === "function"
+                ? renderOption(option as unknown as TOption)
+                : option.label}
+            </Combobox.Option>
+          ))}
+        </Combobox.Options>
       </div>
-      <Combobox.Options className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-y-auto">
-        {fetcher.data?.map((option) => (
-          <Combobox.Option
-            className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1 overflow-x-hidden"
-            key={option.id}
-            value={option}
-          >
-            {typeof renderOption === "function"
-              ? renderOption(option as unknown as TOption)
-              : option.label}
-          </Combobox.Option>
-        ))}
-      </Combobox.Options>
     </Combobox>
   );
 }

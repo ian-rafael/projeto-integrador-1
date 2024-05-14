@@ -7,6 +7,7 @@ import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 import { validateCurrency } from "~/utils/validators";
+import BarcodeInput from "~/components/BarcodeInput";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -67,12 +68,11 @@ export default function ProductCreate () {
           label="Nome"
           type="text"
         />
-        <Input
+        <BarcodeInput
           attr={['code']}
           errorMessage={actionData?.fieldErrors?.code}
           required={true}
           label="Código"
-          type="text"
         />
         <Input
           attr={['price']}

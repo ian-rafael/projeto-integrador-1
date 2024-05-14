@@ -15,10 +15,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const products = await db.product.findMany({
     select: { id: true, name: true, stock: true, price: true },
     where: {
-      name: {
-        contains: escapeFilterString(term),
-        mode: "insensitive",
-      },
+      OR: [
+        {
+          name: {
+            contains: escapeFilterString(term),
+            mode: "insensitive",
+          },
+        },
+        {
+          code: term,
+        },
+      ],
     },
     take: 20,
     orderBy: [

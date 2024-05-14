@@ -2,6 +2,7 @@ import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import BackLink from "~/components/BackLink";
+import BarcodeInput from "~/components/BarcodeInput";
 import { Input, SubmitButton, Textarea, ValidationError } from "~/components/form";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
@@ -92,12 +93,11 @@ export default function ProductEdit () {
           type="text"
           defaultValue={product.name}
         />
-        <Input
+        <BarcodeInput
           attr={['code']}
           errorMessage={actionData?.fieldErrors?.code}
           required={true}
           label="Código"
-          type="text"
           defaultValue={product.code}
         />
         <Input

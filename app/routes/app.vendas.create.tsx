@@ -270,7 +270,7 @@ export default function SaleCreate () {
           <div>
             <Input
               attr={['due_date']}
-              defaultValue={new Date().toISOString().split('T')[0]}
+              defaultValue={DateTime.fromMillis(Date.now()).toISODate()!}
               errorMessage={actionData?.fieldErrors?.dueDate}
               required={true}
               label="Data do primeiro vencimento"

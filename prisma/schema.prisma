@@ -53,7 +53,7 @@ model Supplier {
 model Product {
   id          String  @id @default(uuid())
   name        String
-  code        String
+  code        String  @unique
   price       Float
   description String?
   stock       Int     @default(0)

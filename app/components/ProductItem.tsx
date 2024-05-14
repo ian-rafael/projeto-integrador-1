@@ -1,6 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ComboBox, Input, type Option } from "./form"
 import { formatCurrency } from "~/utils/formatters"
+import ScannerButton from "./ScannerButton"
+import { useFetcher } from "@remix-run/react"
 
 interface ProductOption extends Option {
   extra: { stock: number, price: number }
@@ -19,8 +21,9 @@ interface ProductItemProps {
   },
 }
 
-function ProductItem ({defaultValues, errorMessages}: ProductItemProps) {
+function ProductItem ({ defaultValues, errorMessages }: ProductItemProps) {
   const [maxQuantity, setMaxQuantity] = useState<number | undefined>(undefined);
+  const [product, setProduct] = useState<ProductOption | null>(null);
   const [unitPrice, setUnitPrice] = useState(defaultValues?.unitPrice || "");
 
   const renderProductOption = (option: ProductOption) => {
@@ -38,6 +41,7 @@ function ProductItem ({defaultValues, errorMessages}: ProductItemProps) {
   };
 
   const onProductChange = (option: ProductOption | null) => {
+    setProduct(option);
     if (option) {
       setMaxQuantity(option.extra.stock);
       setUnitPrice(option.extra.price);
@@ -46,17 +50,38 @@ function ProductItem ({defaultValues, errorMessages}: ProductItemProps) {
     }
   };
 
+  const productFetcher = useProductFetcher({
+    onResult: (product) => {
+      if (product) {
+        const { id, name: label, ...extra } = product;
+        setProduct({ id, label, extra });
+        setUnitPrice(extra.price);
+        setMaxQuantity(extra.stock);
+      } else {
+        setProduct(null);
+        setMaxQuantity(undefined);
+        window.alert("Produto não encontrado");
+      }
+    },
+  });
+
   return (
-    <div className="grid grid-cols-3 gap-1">
+    <div className="grid md:grid-cols-3 gap-1">
       <ComboBox
+        appendElement={(
+          <ScannerButton
+            onResult={(code) => productFetcher.loadByCode(code)}
+          />
+        )}
         attr={['product']}
         defaultValue={defaultValues?.product}
         errorMessage={errorMessages?.product}
-        onChange={onProductChange}
         label="Produto"
+        onChange={onProductChange}
         renderOption={renderProductOption}
         required={true}
         url="/app/produtos-search"
+        value={product}
       />
       <Input
         attr={['quantity']}
@@ -85,3 +110,28 @@ function ProductItem ({defaultValues, errorMessages}: ProductItemProps) {
 }
 
 export default ProductItem;
+
+interface Product {
+  id: string,
+  name: string,
+  price: number,
+  stock: number,
+}
+
+function useProductFetcher ({ onResult }: { onResult: (product: Product | null) => void }) {
+  const [fetcherKey, setFetcherKey] = useState(Math.random().toString());
+  const fetcher = useFetcher<{product: Product|null}>({ key: fetcherKey });
+
+  const loadByCode = (code: string) => {
+    fetcher.load("/app/produtos/get-by-code/" + code);
+  };
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data) {
+      setFetcherKey(Math.random().toString());
+      onResult(fetcher.data.product);
+    }
+  }, [fetcher.state, fetcher.data, onResult]);
+
+  return { loadByCode };
+}
