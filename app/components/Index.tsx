@@ -9,7 +9,7 @@ type Rows = Data[];
 type RenderRow = (data: Data) => React.ReactNode;
 
 function List ({ rows, renderRow }: { rows: Rows, renderRow?: RenderRow }) {
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   return (
     <ul className="grid gap-2 py-2">
       {rows.map((data) => {
@@ -17,7 +17,7 @@ function List ({ rows, renderRow }: { rows: Rows, renderRow?: RenderRow }) {
           <li className="bg-slate-300 rounded-md hover:brightness-95" key={data.id}>
             <Link
               className="flex items-center justify-between p-2"
-              to={data.id + (searchParams.size > 0 ? `?${searchParams}` : '')}
+              to={data.id + location.search}
             >
               {typeof renderRow === "function" ? renderRow(data) : data.name}
             </Link>

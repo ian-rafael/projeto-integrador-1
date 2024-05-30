@@ -1,5 +1,5 @@
 import { CheckIcon, Cross2Icon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { Form, Link } from "@remix-run/react";
+import { Form, Link, useLocation } from "@remix-run/react";
 import { clsx } from "clsx/lite";
 import { formatCurrency, formatDate } from "~/utils/formatters";
 import { AddressType } from "./Address";
@@ -80,10 +80,11 @@ export function Table ({ cols, rows, idKey = 'id' }: TableProps) {
 }
 
 export function EditLink () {
+  const location = useLocation();
   return (
     <Link
       className="text-blue-600 hover:underline flex items-center gap-1"
-      to="edit"
+      to={"edit" + location.search}
     >
       <Pencil1Icon/>
       Editar
