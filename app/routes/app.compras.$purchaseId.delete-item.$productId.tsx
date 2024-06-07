@@ -2,6 +2,7 @@ import { TrashIcon } from "@radix-ui/react-icons";
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import LoadingIcon from "~/components/LoadingIcon";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -64,7 +65,7 @@ export function ProductItemDeleteButton ({purchaseId, productId}: {purchaseId: s
         disabled={isDeleting}
         type="submit"
       >
-        <TrashIcon/>
+        {isDeleting ? <LoadingIcon/> : <TrashIcon/>}
       </button>
     </fetcher.Form>
   );

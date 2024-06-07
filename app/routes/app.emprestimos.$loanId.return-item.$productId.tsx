@@ -3,6 +3,7 @@ import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
+import LoadingIcon from "~/components/LoadingIcon";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -101,6 +102,7 @@ export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanI
         max={maxQuantity}
         min={0}
         name="quantity"
+        readOnly={isUpdating}
         required={true}
         type="number"
       />
@@ -109,7 +111,7 @@ export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanI
         type="submit"
         className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
       >
-        <CheckIcon/>
+        {isUpdating ? <LoadingIcon/> : <CheckIcon/>}
       </button>
     </fetcher.Form>
   );

@@ -1,8 +1,10 @@
 import { $Enums } from "@prisma/client";
+import { CheckIcon } from "@radix-ui/react-icons";
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { DateTime } from "luxon";
 import invariant from "tiny-invariant";
+import LoadingIcon from "~/components/LoadingIcon";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
@@ -57,18 +59,19 @@ export function SaleInstallmentPaymentForm ({saleId, installmentId}: {saleId: st
       className="inline-flex gap-1"
     >
       <input
-        name="date"
-        type="date"
-        required={true}
+        className="h-5 leading-none w-28"
         defaultValue={DateTime.now().toFormat('yyyy-LL-dd')}
-        className="h-5 leading-none"
+        name="date"
+        readOnly={isUpdating}
+        required={true}
+        type="date"
       />
       <button
+        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
         disabled={isUpdating}
         type="submit"
-        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
       >
-        Salvar
+        {isUpdating ? <LoadingIcon/> : <CheckIcon/>}
       </button>
     </fetcher.Form>
   );
