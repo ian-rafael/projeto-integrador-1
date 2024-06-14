@@ -28,9 +28,9 @@ function NavBar () {
       <ul className="px-4 grid gap-4 lg:pr-0">
         <NavListItem to="produtos">Produtos</NavListItem>
         <NavListItem to="clientes">Clientes</NavListItem>
-        <NavListItem to="vendas">Vendas</NavListItem>
-        <NavListItem to="emprestimos">Empréstimos</NavListItem>
         <NavListItem to="fornecedores">Fornecedores</NavListItem>
+        <NavListItem to="emprestimos">Empréstimos</NavListItem>
+        <NavListItem to="vendas">Vendas</NavListItem>
         <NavListItem to="compras">Compras</NavListItem>
         <NavListItem to="usuarios">Usuários</NavListItem>
       </ul>
@@ -59,7 +59,7 @@ function Header ({username}: {username: string}) {
       )}
     >
       <h1 className="px-4">
-        <Link to="/app">Projeto Integrador</Link>
+        <Link to="/app">Jack Nili Modas</Link>
       </h1>
       <NavBar/>
       <div className="px-4 grid grid-cols-[1fr_auto] gap-px">
