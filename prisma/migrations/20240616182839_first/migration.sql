@@ -181,4 +181,5 @@ ALTER TABLE "ProductLoan" ADD CONSTRAINT "ProductLoan_loanId_fkey" FOREIGN KEY (
 ALTER TABLE "ProductLoan" ADD CONSTRAINT "ProductLoan_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Seed
--- INSERT INTO "User" ("id", "name", "username", "passwordHash", "createdAt", "updatedAt") VALUES ('bf20168e-5f7d-43fc-bbfd-44a2b5dbb517', 'Administrador', 'administrador', '$2a$10$BYsYGwqBTUUrSiw8gXpSR.OrrQGco8gM7oSujinnlGrF.6lOyKvDm', '2024-06-20 20:29:08', '2024-06-20 20:29:08');
+-- passwordHash = senha
+INSERT INTO "User" ("id", "name", "username", "passwordHash", "createdAt", "updatedAt") VALUES ('bf20168e-5f7d-43fc-bbfd-44a2b5dbb517', 'Administrador', 'administrador', '$2a$10$BYsYGwqBTUUrSiw8gXpSR.OrrQGco8gM7oSujinnlGrF.6lOyKvDm', '2024-06-20 20:29:08', '2024-06-20 20:29:08');
