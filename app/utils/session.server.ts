@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import { db } from "./db.server";
-import bcrypt from "bcryptjs";
+import bcrypt from "./bcrypt.server";
 
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {

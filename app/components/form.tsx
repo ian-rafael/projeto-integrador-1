@@ -1,4 +1,4 @@
-import { Combobox } from "@headlessui/react";
+import { Combobox, ComboboxButton, ComboboxInput, Label as ComboboxLabel, ComboboxOption, ComboboxOptions } from "@headlessui/react";
 import { CaretSortIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useFetcher } from "@remix-run/react";
 import cep, { type CEP } from "cep-promise";
@@ -6,6 +6,7 @@ import { clsx } from "clsx/lite";
 import { useEffect, useId, useRef, useState } from "react";
 import { maskCEP, maskCNPJ, maskCPF, maskPhone } from "~/utils/masks";
 import { validateCEP } from "~/utils/validators";
+import LoadingIcon from "./LoadingIcon";
 
 interface ContainerProps {
   className?: string,
@@ -17,14 +18,14 @@ interface ContainerProps {
   labelPosition?: "pre" | "post";
 }
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.ComponentProps<'input'> {
   appendElement?: React.ReactNode;
   attr: string[];
   errorMessage?: string;
   label: string;
 }
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends React.ComponentProps<'textarea'> {
   attr: string[];
   errorMessage?: string;
   label: string;
@@ -35,7 +36,7 @@ export type Option = {
   label: string;
 };
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectProps extends React.ComponentProps<'select'> {
   attr: string[];
   errorMessage?: string;
   label: string;
@@ -56,7 +57,7 @@ function useInputAttr (attr: string[]) {
   return {id, name, htmlFor: id, errorId};
 }
 
-export function ValidationError ({ children, className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+export function ValidationError ({ children, className, ...props }: React.ComponentProps<'p'>) {
   return (
     <p
       className={clsx("text-xs text-red-500", className)}
@@ -109,7 +110,7 @@ export function Input ({ appendElement, label, attr, errorMessage, ...inputProps
     >
       <div className={clsx("relative", isRadioInput && "inline-block mr-1")}>
         <input
-          className={clsx(inputClassNames, appendElement && "pr-7", isRadioInput && "shadow-none")}
+          className={clsx(inputClassNames, appendElement && "pr-7", isRadioInput && "h-auto")}
           id={id}
           name={name}
           aria-invalid={Boolean(errorMessage)}
@@ -228,11 +229,10 @@ export function CepInput ({defaultValue, onData, ...rest}: Omit<InputProps, "typ
   const appendElement = (
     <button
       disabled={isLoading}
-      className={clsx(isLoading && "opacity-15")}
       type="button"
       onClick={handleSearch}
     >
-      <MagnifyingGlassIcon/>
+      {isLoading ? <LoadingIcon/> : <MagnifyingGlassIcon/>}
     </button>
   );
 
@@ -309,17 +309,17 @@ export function FormArray ({ children, defaultLength = 0 }: FormArrayProps) {
   );
 }
 
-interface ComboBoxProps <TOption> {
+interface ComboBoxProps <T> {
   appendElement?: React.ReactNode;
   attr: string[];
-  defaultValue?: TOption;
+  defaultValue?: T;
   errorMessage?: string;
   label: string;
-  onChange?: (value: TOption | null) => void;
-  renderOption?: (option: TOption) => React.ReactNode;
+  onChange?: (value: T | null) => void;
+  renderOption?: (option: T) => React.ReactNode;
   required?: boolean;
   url: string;
-  value?: TOption | null;
+  value?: T | null;
 }
 
 export function ComboBox <TOption extends Option>({
@@ -335,73 +335,82 @@ export function ComboBox <TOption extends Option>({
   value,
 }: ComboBoxProps<TOption>) {
   const fetcher = useFetcher<Option[]>();
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const {name, errorId} = useInputAttr(attr);
+  const [query, setQuery] = useState('')
+  const timeoutRef = useRef<number|undefined>(undefined);
 
-  const load = (term: string) => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    timerRef.current = setTimeout(() => {
-      fetcher.load(url + "?term=" + term);
+  const clearTimeout = () => window.clearTimeout(timeoutRef.current);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearTimeout();
+    timeoutRef.current = window.setTimeout(() => {
+      setQuery(e.target.value);
     }, 500);
   };
+  
+  useEffect(() => clearTimeout, []);
 
   useEffect(() => {
-    load('');
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-    }
+    fetcher.load(url + "?term=" + query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [query, url]);
 
-  return (    
+  const renderOptions = () => {
+    if (fetcher.state === 'loading' || !fetcher.data) {
+      return <div className="opacity-50"><div className="flex items-center gap-1"><LoadingIcon/> Buscando...</div></div>;
+    }
+  
+    if (fetcher.data.length === 0) {
+      return <div className="opacity-50">Nenhum registro encontrado.</div>;
+    }
+
+    return fetcher.data.map((option) => (
+      <ComboboxOption
+        className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1 overflow-x-hidden"
+        key={option.id}
+        value={option}
+      >
+        {typeof renderOption === "function"
+          ? renderOption(option as unknown as TOption)
+          : option.label}
+      </ComboboxOption>
+    ));
+  };
+
+  return (
     <Combobox
       as={Container}
       defaultValue={defaultValue}
       errorId={errorId}
       errorMessage={errorMessage}
       name={name}
-      nullable={true}
+      onClose={() => setQuery('')}
       onChange={onChange}
       value={value}
     >
-      <Combobox.Label>{label}</Combobox.Label>
+      <ComboboxLabel>{label}</ComboboxLabel>
       <div className="relative">
         <span className={prependElementClassNames}>
           <MagnifyingGlassIcon/>
         </span>
-        <Combobox.Input
+        <ComboboxInput
           aria-errormessage={errorMessage ? errorId : undefined}
           aria-invalid={Boolean(errorMessage)}
           autoComplete="off"
           className={clsx(inputClassNames, 'pl-8', appendElement ? 'pr-14' :'pr-8')}
           displayValue={(option: Option) => option ? option.label : ''}
-          onBlur={() => load('')}
-          onChange={(e) => load(e.target.value)}
+          onChange={handleInputChange}
           required={required}
         />
         <span className={clsx(appendElementClassNames, appendElement && "grid-cols-2 gap-2")}>
           {appendElement}
-          <Combobox.Button>
+          <ComboboxButton>
             <CaretSortIcon/>
-          </Combobox.Button>
+          </ComboboxButton>
         </span>
-        <Combobox.Options className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-y-auto">
-          {fetcher.data?.map((option) => (
-            <Combobox.Option
-              className="cursor-pointer bg-slate-100 data-[headlessui-state=active]:brightness-95 p-1 overflow-x-hidden"
-              key={option.id}
-              value={option}
-            >
-              {typeof renderOption === "function"
-                ? renderOption(option as unknown as TOption)
-                : option.label}
-            </Combobox.Option>
-          ))}
-        </Combobox.Options>
+        <ComboboxOptions className="absolute top-full inset-x-0 grid gap-1 bg-slate-50 z-10 p-1 mt-[2px] rounded-sm shadow-lg max-h-48 overflow-y-auto">
+          {renderOptions()}
+        </ComboboxOptions>
       </div>
     </Combobox>
   );

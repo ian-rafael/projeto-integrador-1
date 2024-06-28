@@ -25,7 +25,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Supplier not found", { status: 404 });
   }
 
-  return json({ supplier: { ...supplier, address: supplier.address as AddressType } });
+  return json({ supplier });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -136,7 +136,7 @@ export default function SupplierEdit () {
           required={true}
         />
         <Address
-          defaultValues={supplier.address}
+          defaultValues={supplier.address as AddressType}
           errorMessages={{
             zipcode: actionData?.fieldErrors?.zipcode,
             state: actionData?.fieldErrors?.state,

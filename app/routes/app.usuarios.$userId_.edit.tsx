@@ -1,11 +1,11 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import bcrypt from "bcryptjs";
 import invariant from "tiny-invariant";
 import BackLink from "~/components/BackLink";
 import { Input, SubmitButton, ValidationError } from "~/components/form";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
+import bcrypt from "~/utils/bcrypt.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";

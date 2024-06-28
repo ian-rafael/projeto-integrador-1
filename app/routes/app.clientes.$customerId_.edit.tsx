@@ -25,7 +25,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Customer not found", { status: 404 });
   }
 
-  return json({ customer: { ...customer, address: customer.address as AddressType } });
+  return json({ customer });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -136,7 +136,7 @@ export default function CustomerEdit () {
           required={true}
         />
         <Address
-          defaultValues={customer.address}
+          defaultValues={customer.address as AddressType}
           errorMessages={{
             zipcode: actionData?.fieldErrors?.zipcode,
             state: actionData?.fieldErrors?.state,

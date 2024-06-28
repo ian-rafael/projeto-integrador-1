@@ -20,7 +20,7 @@ interface AddressProps {
     state?: string
     city?: string
     street?: string
-    number?: number | string
+    number?: number
     complement?: string
   },
   errorMessages?: {
@@ -39,7 +39,7 @@ export interface AddressType {
   city?: string
   street?: string
   number?: number
-  complement?: number
+  complement?: string
 }
 
 export default function Address ({defaultValues, errorMessages}: AddressProps) {

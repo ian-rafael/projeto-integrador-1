@@ -1,9 +1,9 @@
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import bcrypt from "bcryptjs";
 import BackLink from "~/components/BackLink";
 import { Frame, FrameHeader } from "~/components/frame";
 import { Input, SubmitButton, ValidationError } from "~/components/form";
+import bcrypt from "~/utils/bcrypt.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
