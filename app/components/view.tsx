@@ -1,5 +1,5 @@
 import { CheckIcon, Cross2Icon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { Form, Link, useLocation } from "@remix-run/react";
+import { Form, Link, useLocation, useNavigation } from "@remix-run/react";
 import { clsx } from "clsx/lite";
 import { formatCurrency, formatDate } from "~/utils/formatters";
 import { AddressType } from "./Address";
@@ -93,6 +93,9 @@ export function EditLink () {
 }
 
 export function DeleteButton ({action}: {action?: string}) {
+  // com useFormStatus do React 19 vai dar para fazer melhor essa trozoba e botar o icone de loading
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state !== 'idle';
   return (
     <Form
       action={action}
@@ -108,7 +111,8 @@ export function DeleteButton ({action}: {action?: string}) {
       }}
     >
       <button
-        className="px-3 py-1 rounded-sm flex items-center gap-1 shadow-sm bg-slate-50 text-red-500 hover:brightness-95"
+        className="px-3 py-1 rounded-sm flex items-center gap-1 shadow-sm bg-slate-50 text-red-500 hover:brightness-95 disabled:opacity-60"
+        disabled={isSubmitting}
         name="intent"
         value="delete"
         type="submit"

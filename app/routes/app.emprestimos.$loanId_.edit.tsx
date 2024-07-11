@@ -34,7 +34,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireUserId(request);
 
-  invariant(params.saleId, "params.saleId is required");
+  invariant(params.loanId, "params.loanId is required");
 
   const form = await request.formData();
   const customerId = form.get("customer[id]");
@@ -67,7 +67,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const loan = await db.loan.update({
     where: { id: params.loanId },
-    data: { customerId, dueDate },
+    data: { customerId, dueDate: DateTime.fromISO(dueDate).toJSDate() },
   });
 
   return redirect("/app/emprestimos/" + loan.id);

@@ -1,6 +1,6 @@
 import { Combobox, ComboboxButton, ComboboxInput, Label as ComboboxLabel, ComboboxOption, ComboboxOptions } from "@headlessui/react";
 import { CaretSortIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useNavigation } from "@remix-run/react";
 import cep, { type CEP } from "cep-promise";
 import { clsx } from "clsx/lite";
 import { useEffect, useId, useRef, useState } from "react";
@@ -417,11 +417,24 @@ export function ComboBox <TOption extends Option>({
 }
 
 export function SubmitButton ({className, children}: {children: React.ReactNode, className?: string}) {
+  // com useFormStatus do React 19 vai dar para fazer melhor essa trozoba e botar o icone de loading
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state !== 'idle';
   return (
     <button
-      className={clsx(className, "px-6 py-1 mt-4 bg-slate-400 text-slate-50 rounded-sm shadow-sm hover:brightness-95")}
+      disabled={isSubmitting}
+      className={clsx(className,
+        "px-6 py-1 mt-4 bg-slate-400 text-slate-50 rounded-sm shadow-sm",
+        "hover:brightness-95 disabled:opacity-60"
+      )}
       type="submit"
     >
+      {/* <span className="relative inline-flex items-center">
+        {isSubmitting ? (
+          <span className="absolute -left-1 -translate-x-full"><LoadingIcon/></span>
+        ) : null}
+        {children}
+      </span> */}
       {children}
     </button>
   );
