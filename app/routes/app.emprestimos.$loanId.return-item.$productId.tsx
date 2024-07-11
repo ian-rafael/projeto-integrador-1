@@ -77,21 +77,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanId: string, productId: string, maxQuantity: number}) {
   const fetcher = useFetcher<typeof action>();
   const isUpdating = fetcher.state !== "idle";
-  const isSubmitting = fetcher.state === "submitting";
   const actionUrl = "/app/emprestimos/" + loanId + "/return-item/" + productId;
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (isSubmitting) {
-      formRef.current?.reset();
-    }
-  }, [isSubmitting]);
-
   return (
     <fetcher.Form
       action={actionUrl}
       method="post"
-      ref={formRef}
       className="inline-flex gap-1"
     >
       <input
@@ -100,7 +90,7 @@ export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanI
         defaultValue={maxQuantity}
         key={maxQuantity}
         max={maxQuantity}
-        min={0}
+        min={1}
         name="quantity"
         readOnly={isUpdating}
         required={true}
@@ -109,7 +99,7 @@ export function ProductItemReceiveForm ({loanId, productId, maxQuantity}: {loanI
       <button
         disabled={isUpdating}
         type="submit"
-        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
+        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95 disabled:opacity-60"
       >
         {isUpdating ? <LoadingIcon/> : <CheckIcon/>}
       </button>

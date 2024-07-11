@@ -67,7 +67,7 @@ export function SaleInstallmentPaymentForm ({saleId, installmentId}: {saleId: st
         type="date"
       />
       <button
-        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95"
+        className="h-5 rounded-sm shadow-sm bg-slate-50 text-sm px-1 hover:brightness-95 disabled:opacity-60"
         disabled={isUpdating}
         type="submit"
       >
