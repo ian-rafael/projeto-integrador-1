@@ -16,8 +16,8 @@ model User {
   username     String @unique
   passwordHash String
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
   firstLogin Boolean  @default(true)
 }
 
@@ -32,8 +32,8 @@ model Customer {
   sales Sale[]
   loans Loan[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model Supplier {
@@ -46,8 +46,8 @@ model Supplier {
 
   purchases Purchase[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model Product {
@@ -62,8 +62,8 @@ model Product {
   saleItems     ProductSale[]
   loanItems     ProductLoan[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model Purchase {
@@ -73,8 +73,8 @@ model Purchase {
   supplierId   String
   productItems ProductPurchase[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model ProductPurchase {
@@ -100,8 +100,8 @@ model Sale {
   productItems ProductSale[]
   installments SaleInstallment[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model ProductSale {
@@ -119,8 +119,8 @@ model ProductSale {
 model SaleInstallment {
   id          String    @id @default(uuid())
   value       Float
-  dueDate     DateTime
-  paymentDate DateTime?
+  dueDate     DateTime  @db.Timestamptz(3)
+  paymentDate DateTime? @db.Timestamptz(3)
 
   saleId String
   sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
@@ -135,15 +135,15 @@ enum StatusParcela {
 
 model Loan {
   id      String   @id @default(uuid())
-  dueDate DateTime
+  dueDate DateTime @db.Timestamptz(3)
 
   sale         Sale?
   customer     Customer      @relation(fields: [customerId], references: [id])
   customerId   String
   productItems ProductLoan[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model ProductLoan {
