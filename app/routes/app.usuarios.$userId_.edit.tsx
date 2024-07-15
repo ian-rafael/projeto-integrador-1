@@ -6,9 +6,11 @@ import { Input, SubmitButton, ValidationError } from "~/components/form";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
 import bcrypt from "~/utils/bcrypt.server";
+import { validateUniqueUsername } from "~/utils/db-validators.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateMinLength, validateRequired } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -65,9 +67,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { name, username };
   const fieldErrors = {
-    name: name.length < 1 ? "Nome é obrigatório" : undefined,
-    username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
-    password: password && password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    name: validateRequired(name, "Nome"),
+    username: validateRequired(username, "Nome de usuário") || (await validateUniqueUsername(username, params.userId)),
+    password: password.length > 0 ? validateMinLength(password, 8, "Senha") : undefined,
     repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {

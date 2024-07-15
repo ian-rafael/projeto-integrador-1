@@ -9,6 +9,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const users = await db.user.findMany({
     select: { id: true, name: true },
+    orderBy: { name: "asc" },
   });
   return json({ users });
 };

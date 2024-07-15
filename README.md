@@ -79,11 +79,11 @@ yarn prisma db seed
 
 # TODO
 
-- [ ] ?? Manter filtros ao entrar no registro.
-- [X] Vendas: filtro TODOS.
-- [X] Compra: Pendente / Entregue na lista e Filtro.
-- [X] Empréstimo: filtro Status, Cliente; Status na listagem.
-- [X] Empréstimo: Bloquear venda quando já todos itens devolvidos.
-- [X] Empréstimo: Para cada item input-number pra devolver.
-- [X] Empréstimo: Na venda só os que não foram devolvidos.
-- [X] Venda: Auto preencher Preço unitário do produto.
+- [ ] verificar por que as vezes o fetcher não revalida as rotas
+- [X] loading no botão de salvar registro (Não dá pra saber o form)
+- [X] Receber produtos tá mundando o valor pro original quando clica no botão
+- [X] adicionar timestamp com time zone nas datas
+- [ ] id auto_increment?
+- [X] adicionar validações melhores (cpf já existe, ...)
+- [X] ErrorBoundary
+- [ ] melhorar search (q) fornecedor, produto e cliente

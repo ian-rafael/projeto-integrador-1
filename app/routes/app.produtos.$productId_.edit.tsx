@@ -6,10 +6,11 @@ import BarcodeInput from "~/components/BarcodeInput";
 import { Input, SubmitButton, Textarea, ValidationError } from "~/components/form";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
+import { validateUniqueProductCode } from "~/utils/db-validators.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-import { validateCurrency } from "~/utils/validators";
+import { validateCurrency, validateRequired } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -54,9 +55,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { name, code, price, description };
   const fieldErrors = {
-    name: name.length < 1 ? "Nome é obrigatório" : undefined,
-    code: code.length < 1 ? "Código é obrigatório" : undefined,
-    price: price.length < 1 ? "Preço é obrigatório" : validateCurrency(price, "Preço"),
+    name: validateRequired(name, "Nome"),
+    code: validateRequired(code, "Código") || (await validateUniqueProductCode(code, params.productId)),
+    price: validateRequired(price, "Preço") || validateCurrency(price, "Preço"),
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({

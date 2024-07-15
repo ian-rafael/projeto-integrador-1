@@ -1,7 +1,6 @@
 import { CheckIcon } from "@radix-ui/react-icons";
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 import LoadingIcon from "~/components/LoadingIcon";
 import { db } from "~/utils/db.server";

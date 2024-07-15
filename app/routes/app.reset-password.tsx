@@ -7,6 +7,7 @@ import bcrypt from "~/utils/bcrypt.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateMinLength } from "~/utils/validators";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -26,7 +27,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   const fieldErrors = {
-    password: password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    password: validateMinLength(password, 8, "Senha"),
     repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {

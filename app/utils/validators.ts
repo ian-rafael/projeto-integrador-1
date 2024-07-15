@@ -120,3 +120,21 @@ export function validateCurrency (value: string, label: string) {
     return label + " inválido";
   }
 }
+
+export function validateRequired (value: string, label: string) {
+  if (value.length < 1) {
+    return label + " é obrigatório";
+  }
+}
+
+export function validateMinLength (value: string, min: number, label: string) {
+  if (value.length < min) {
+    return label + ` deve ter no mínimo ${min} caracteres`;
+  }
+}
+
+export function validateDate (value: string, label: string) {
+  if (isNaN(new Date(value).getTime())) {
+    return label + " inválido";
+  }
+}

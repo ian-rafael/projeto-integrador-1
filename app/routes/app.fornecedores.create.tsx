@@ -7,7 +7,8 @@ import { CnpjInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/c
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-import { validateCEP, validateCNPJ, validateEmail, validatePhone } from "~/utils/validators";
+import { validateCEP, validateCNPJ, validateEmail, validatePhone, validateRequired } from "~/utils/validators";
+import { validateUniqueCNPJ } from "~/utils/db-validators.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -45,16 +46,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { name, cnpj, email, phone };
   const fieldErrors = {
-    name: name.length < 1 ? "Nome é obrigatório" : undefined,
-    cnpj: validateCNPJ(cnpj),
-    email: validateEmail(email),
-    phone: validatePhone(phone),
-    zipcode: zipcode.length < 1 ? undefined : validateCEP(zipcode),
-    state: false ? "" : undefined,
-    city: false ? "" : undefined,
-    street: false ? "" : undefined,
-    number: false ? "" : undefined,
-    complement: false ? "" : undefined,
+    name: validateRequired(name, "Nome"),
+    cnpj: validateRequired(cnpj, "CNPJ") || validateCNPJ(cnpj) || (await validateUniqueCNPJ(cnpj)),
+    email: validateRequired(email, "Email") || validateEmail(email),
+    phone: validateRequired(phone, "Telefone") || validatePhone(phone),
+    zipcode: zipcode.length > 0 ? validateCEP(zipcode) : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -108,13 +104,7 @@ export default function SupplierCreate () {
           label="Telefone"
         />
         <Address
-          errorMessages={{
-            zipcode: actionData?.fieldErrors?.zipcode,
-            state: actionData?.fieldErrors?.state,
-            city: actionData?.fieldErrors?.city,
-            street: actionData?.fieldErrors?.street,
-            number: actionData?.fieldErrors?.number,
-          }}
+          errorMessages={{ zipcode: actionData?.fieldErrors?.zipcode }}
         />
         {actionData?.formError ? (
           <ValidationError>

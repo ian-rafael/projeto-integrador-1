@@ -4,8 +4,8 @@ import { Input } from "./form";
 
 type BarcodeInputProps = Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type">;
 
-function BarcodeInput (props: BarcodeInputProps) {
-  const [value, setValue] = useState(props.defaultValue || "");
+function BarcodeInput ({defaultValue, ...props}: BarcodeInputProps) {
+  const [value, setValue] = useState(defaultValue || "");
 
   const appendElement = (
     <>

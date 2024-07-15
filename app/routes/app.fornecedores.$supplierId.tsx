@@ -25,7 +25,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Supplier not found", { status: 404 });
   }
 
-  return json({ supplier: {...supplier, address: supplier.address as AddressType } });
+  return json({ supplier });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -69,7 +69,7 @@ export default function SupplierView () {
           {supplier.phone}
         </Item>
         <Item title="Endereço">
-          <AddressView data={supplier.address}/>
+          <AddressView data={supplier.address as AddressType}/>
         </Item>
         <Item title="Criado em">
           {formatDateHour(supplier.createdAt)}

@@ -8,6 +8,7 @@ import { requireUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { DateTime } from "luxon";
 import ProductItem from "~/components/ProductItem";
+import { validateCurrency, validateDate, validateRequired } from "~/utils/validators";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -46,8 +47,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { customer: customerId, due_date: dueDate, products: productIds, quantity: quantities, unitPrice: unitPrices };
   const fieldErrors = {
-    customer: customerId.length < 1 ? "Cliente é obrigatório" : undefined,
-    dueDate: isNaN(new Date(dueDate).getTime()) ? "Data inválida" : undefined,
+    customer: validateRequired(customerId, "Cliente"),
+    dueDate: validateDate(dueDate, "Data de devolução"),
     // slice para não aparecer o texto em dois inputs diferentes
     products: productIds.map((value, i) => productIds.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
     quantities: productItems.map(({productId, quantity}) =>
@@ -55,6 +56,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ? `Quantidade maior do que estoque (${productsStockMap[productId]})`
       : undefined
     ),
+    unitPrices: unitPrices.map((value) => validateCurrency(value as string, "Preço unitário")),
   };
   if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
     return badRequest({
@@ -113,8 +115,9 @@ export default function LoanCreate () {
           {(i) => (
             <ProductItem
               errorMessages={{
-                product: actionData?.fieldErrors?.products[i] || undefined,
-                quantity: actionData?.fieldErrors?.quantities[i] || undefined,
+                product: actionData?.fieldErrors?.products[i],
+                quantity: actionData?.fieldErrors?.quantities[i],
+                unitPrice: actionData?.fieldErrors?.unitPrices[i],
               }}
             />
           )}

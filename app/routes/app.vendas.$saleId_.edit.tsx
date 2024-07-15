@@ -8,6 +8,7 @@ import Tag from "~/components/Tag";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateRequired } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -46,7 +47,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { customer: customerId };
   const fieldErrors = {
-    customer: customerId.length < 1 ? "Fornecedor é obrigatório" : undefined,
+    customer: validateRequired(customerId, "Cliente"),
   };
 
   if (Object.values(fieldErrors).some(Boolean)) {

@@ -8,15 +8,16 @@ import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
 import ProductItem from "~/components/ProductItem";
+import { validateCurrency, validateDate, validateRequired } from "~/utils/validators";
 
 function validateInstallmentQuantity (installmentQuantity: string) {
-  return !installmentQuantity
-    ? "Quantidade inválida"
-    : Number(installmentQuantity) < 1
-    ? "O mínimo de parcelas é 1"
-    : Number(installmentQuantity) > 12
-    ? "O máximo de parcelas é 12"
-    : undefined;
+  return validateRequired(installmentQuantity, "Parcelas") || (
+    Number(installmentQuantity) < 1
+      ? "O mínimo de parcelas é 1"
+      : Number(installmentQuantity) > 12
+      ? "O máximo de parcelas é 12"
+      : undefined
+  );
 }
 
 async function createSale ({
@@ -96,9 +97,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const fieldErrors = {
       customer: !loan.customerId ? "Cliente é obrigatório" : undefined,
       installmentQuantity: validateInstallmentQuantity(installmentQuantity),
-      dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
+      dueDate: validateDate(firstDueDate, "Data do primeiro vencimento"),
       quantities: [],
       products: [],
+      unitPrices: unitPrices.map((value) => validateCurrency(value as string, "Preço unitário")),
     };
     if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
       return badRequest({
@@ -153,9 +155,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { customer: customerId, installment_quantity: installmentQuantity, due_date: firstDueDate };
   const fieldErrors = {
-    customer: !customerId ? "Cliente é obrigatório" : undefined,
+    customer: validateRequired(customerId, "Cliente"),
     installmentQuantity: validateInstallmentQuantity(installmentQuantity),
-    dueDate: isNaN(new Date(firstDueDate).getTime()) ? "Data inválida" : undefined,
+    dueDate: validateDate(firstDueDate, "Data do primeiro vencimento"),
     // slice para não aparecer o texto em dois inputs diferentes
     products: productIds.map((value, i) => productIds.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
     quantities: productItems.map(({productId, quantity}) =>
@@ -163,6 +165,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ? `Quantidade maior do que estoque (${productsStockMap[productId]})`
       : undefined
     ),
+    unitPrices: unitPrices.map((value) => validateCurrency(value as string, "Preço unitário")),
   };
   if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
     return badRequest({
@@ -311,6 +314,7 @@ export default function SaleCreate () {
                 errorMessages={{
                   product: actionData?.fieldErrors?.products[i] || undefined,
                   quantity: actionData?.fieldErrors?.quantities[i] || undefined,
+                  unitPrice: actionData?.fieldErrors?.unitPrices[i],
                 }}
               />
             )}

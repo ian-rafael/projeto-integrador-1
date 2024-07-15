@@ -3,6 +3,7 @@ import { Form, useActionData } from "@remix-run/react";
 import { Input, SubmitButton, ValidationError } from "~/components/form";
 import { badRequest } from "~/utils/request.server";
 import { createUserSession, login } from "~/utils/session.server";
+import { validateRequired } from "~/utils/validators";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const form = await request.formData();
@@ -22,8 +23,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { username, password };
   const fieldErrors = {
-    username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
-    password: password.length < 1 ? "Senha é obrigatório" : undefined,
+    username: validateRequired(username, "Nome de usuário"),
+    password: validateRequired(password, "Senha"),
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({

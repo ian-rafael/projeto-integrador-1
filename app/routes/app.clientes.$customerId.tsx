@@ -25,7 +25,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Customer not found", { status: 404 });
   }
 
-  return json({ customer: {...customer, address: customer.address as AddressType } });
+  return json({ customer });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -69,7 +69,7 @@ export default function CustomerView () {
           {customer.phone}
         </Item>
         <Item title="Endereço">
-          <AddressView data={customer.address}/>
+          <AddressView data={customer.address as AddressType}/>
         </Item>
         <Item title="Criado em">
           {formatDateHour(customer.createdAt)}

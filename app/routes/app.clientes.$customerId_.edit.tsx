@@ -6,10 +6,11 @@ import BackLink from "~/components/BackLink";
 import { CpfInput, Input, PhoneInput, SubmitButton, ValidationError } from "~/components/form";
 import { Frame, FrameHeader } from "~/components/frame";
 import Tag from "~/components/Tag";
+import { validateUniqueCPF } from "~/utils/db-validators.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
-import { validateCEP, validateCPF, validateEmail, validatePhone } from "~/utils/validators";
+import { validateCEP, validateCPF, validateEmail, validatePhone, validateRequired } from "~/utils/validators";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireUserId(request);
@@ -66,16 +67,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const fields = { name, cpf, email, phone };
   const fieldErrors = {
-    name: name.length < 1 ? "Nome é obrigatório" : undefined,
-    cpf: validateCPF(cpf),
-    email: validateEmail(email),
-    phone: validatePhone(phone),
-    zipcode: zipcode.length < 1 ? undefined : validateCEP(zipcode),
-    state: false ? "" : undefined,
-    city: false ? "" : undefined,
-    street: false ? "" : undefined,
-    number: false ? "" : undefined,
-    complement: false ? "" : undefined,
+    name: validateRequired(name, "Nome"),
+    cpf: validateRequired(cpf, "CPF") || validateCPF(cpf) || (await validateUniqueCPF(cpf, params.customerId)),
+    email: validateRequired(email, "Email") || validateEmail(email),
+    phone: validateRequired(phone, "Telefone") || validatePhone(phone),
+    zipcode: zipcode.length > 0 ? validateCEP(zipcode) : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -137,13 +133,7 @@ export default function CustomerEdit () {
         />
         <Address
           defaultValues={customer.address as AddressType}
-          errorMessages={{
-            zipcode: actionData?.fieldErrors?.zipcode,
-            state: actionData?.fieldErrors?.state,
-            city: actionData?.fieldErrors?.city,
-            street: actionData?.fieldErrors?.street,
-            number: actionData?.fieldErrors?.number,
-          }}
+          errorMessages={{ zipcode: actionData?.fieldErrors?.zipcode }}
         />
         {actionData?.formError ? (
           <ValidationError>

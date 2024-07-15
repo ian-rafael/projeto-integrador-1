@@ -7,6 +7,8 @@ import bcrypt from "~/utils/bcrypt.server";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateMinLength, validateRequired } from "~/utils/validators";
+import { validateUniqueUsername } from "~/utils/db-validators.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -32,9 +34,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { name, username };
   const fieldErrors = {
-    name: name.length < 1 ? "Nome é obrigatório" : undefined,
-    username: username.length < 1 ? "Nome de usuário é obrigatório" : undefined,
-    password: password.length < 8 ? "A senha deve ter ao menos 8 caracteres" : undefined,
+    name: validateRequired(name, "Nome"),
+    username: validateRequired(username, "Nome de usuário") || (await validateUniqueUsername(username)),
+    password: validateRequired(password, "Senha") || validateMinLength(password, 8, "Senha"),
     repeatPassword: password !== repeatPassword ? "As senhas devem ser iguais" : undefined,
   };
   if (Object.values(fieldErrors).some(Boolean)) {

@@ -6,6 +6,7 @@ import { ComboBox, FormArray, Input, SubmitButton, ValidationError } from "~/com
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { requireUserId } from "~/utils/session.server";
+import { validateCurrency, validateRequired } from "~/utils/validators";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireUserId(request);
@@ -31,8 +32,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const fields = { supplier: supplierId };
   const fieldErrors = {
-    supplier: supplierId.length < 1 ? "Fornecedor é obrigatório" : undefined,
+    supplier: validateRequired(supplierId, "Fornecedor"),
     products: products.map((value, i) => products.slice(0, i).includes(value) ? "Produto duplicado" : undefined),
+    unitPrices: unitPrices.map((value) => validateCurrency(value as string, "Preço unitário")),
   };
   if (Object.values(fieldErrors).some((value) => typeof value === "string" ? Boolean(value) : value?.some(Boolean))) {
     return badRequest({
@@ -81,7 +83,7 @@ export default function PurchaseCreate () {
             <div className="grid grid-cols-3 gap-1">
               <ComboBox
                 attr={['product']}
-                errorMessage={actionData?.fieldErrors?.products[i] || undefined}
+                errorMessage={actionData?.fieldErrors?.products[i]}
                 label="Produto"
                 required={true}
                 url="/app/produtos-search"
@@ -96,6 +98,7 @@ export default function PurchaseCreate () {
               />
               <Input
                 attr={['unitPrice']}
+                errorMessage={actionData?.fieldErrors?.unitPrices[i]}
                 label="Preço unitário"
                 min={0}
                 required={true}

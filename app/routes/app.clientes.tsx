@@ -22,7 +22,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const customers = await db.customer.findMany({
     select: { id: true, name: true },
-    where: filters
+    where: filters,
+    orderBy: { name: "asc" },
   });
 
   return json({ customers, searchFiltersCount: Object.keys(filters).length });
