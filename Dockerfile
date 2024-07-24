@@ -6,7 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG NODE_VERSION=18.20.1
+ARG NODE_VERSION=20.10.0
 
 ################################################################################
 # Use node image for base image for all stages.
@@ -66,7 +66,6 @@ COPY package.json .
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /usr/src/app/build ./build
-COPY --from=build /usr/src/app/public/build ./public/build
 COPY --from=build /usr/src/app/public/favicon.ico ./public/favicon.ico
 COPY --from=build /usr/src/app/prisma ./prisma
 
