@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
+import BarcodeInput from "~/components/BarcodeInput";
 import Index from "~/components/Index";
 import { Input } from "~/components/form";
 import { db } from "~/utils/db.server";
@@ -12,6 +13,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
+  const code = url.searchParams.get("code");
   const stock = url.searchParams.get("stock");
 
   const filters: Prisma.ProductWhereInput = {};
@@ -20,6 +22,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       contains: escapeFilterString(q),
       mode: "insensitive",
     };
+  }
+  if (code) {
+    filters.code = code;
   }
   if (stock && Number.isInteger(Number(stock))) {
     filters.stock = { lte: Number(stock) };
@@ -46,6 +51,11 @@ export default function Products () {
         defaultValue={searchParams.get('q') || undefined}
         placeholder="Nome"
         type="text"
+      />
+      <BarcodeInput
+        attr={["code"]}
+        label="Código"
+        defaultValue={searchParams.get('code') || undefined}
       />
       <Input
         attr={["stock"]}

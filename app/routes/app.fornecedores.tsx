@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, useLoaderData, useSearchParams } from "@remix-run/react";
 import Index from "~/components/Index";
-import { Input } from "~/components/form";
+import { CnpjInput, Input } from "~/components/form";
 import { db } from "~/utils/db.server";
 import { escapeFilterString } from "~/utils/helper";
 import { requireUserId } from "~/utils/session.server";
@@ -12,6 +12,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
+  const cnpj = url.searchParams.get("cnpj");
 
   const filters: Prisma.SupplierWhereInput = {};
   if (q) {
@@ -19,6 +20,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       contains: escapeFilterString(q),
       mode: "insensitive",
     };
+  }
+  if (cnpj) {
+    filters.cnpj = cnpj;
   }
 
   const suppliers = await db.supplier.findMany({
@@ -35,13 +39,20 @@ export default function Suppliers () {
   const [searchParams] = useSearchParams();
 
   const searchFields = (
-    <Input
-      attr={["q"]}
-      label=""
-      defaultValue={searchParams.get('q') || undefined}
-      placeholder="Nome"
-      type="text"
-    />
+    <>
+      <Input
+        attr={["q"]}
+        label=""
+        defaultValue={searchParams.get('q') || undefined}
+        placeholder="Nome"
+        type="text"
+      />
+      <CnpjInput
+        attr={["cnpj"]}
+        defaultValue={searchParams.get('cnpj') || undefined}
+        label="CNPJ"
+      />
+    </>
   );
 
   return (
