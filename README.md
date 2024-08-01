@@ -54,14 +54,3 @@ yarn prisma db push
 ```sh
 yarn prisma db seed
 ```
-
-# TODO
-
-- [ ] ~~verificar por que as vezes o fetcher não revalida as rotas~~
-- [X] loading no botão de salvar registro (Não dá pra saber o form)
-- [X] Receber produtos tá mundando o valor pro original quando clica no botão
-- [X] adicionar timestamp com time zone nas datas
-- [ ] id auto_increment?
-- [X] adicionar validações melhores (cpf já existe, ...)
-- [X] ErrorBoundary
-- [ ] melhorar search (q) fornecedor, produto e cliente
