@@ -59,7 +59,7 @@ export default function SupplierView () {
         <Item title="Nome">
           {supplier.name}
         </Item>
-        <Item title="Email">
+        <Item title="E-mail">
           {supplier.email}
         </Item>
         <Item title="CNPJ">

@@ -69,7 +69,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const fieldErrors = {
     name: validateRequired(name, "Nome"),
     cpf: validateRequired(cpf, "CPF") || validateCPF(cpf) || (await validateUniqueCPF(cpf, params.customerId)),
-    email: validateRequired(email, "Email") || validateEmail(email),
+    email: validateRequired(email, "E-mail") || validateEmail(email),
     phone: validateRequired(phone, "Telefone") || validatePhone(phone),
     zipcode: zipcode.length > 0 ? validateCEP(zipcode) : undefined,
   };
@@ -113,7 +113,7 @@ export default function CustomerEdit () {
           attr={['email']}
           defaultValue={customer.email}
           errorMessage={actionData?.fieldErrors?.email}
-          label="Email"
+          label="E-mail"
           required={true}
           type="email"
         />

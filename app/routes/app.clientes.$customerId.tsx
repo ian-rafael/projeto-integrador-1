@@ -59,7 +59,7 @@ export default function CustomerView () {
         <Item title="Nome">
           {customer.name}
         </Item>
-        <Item title="Email">
+        <Item title="E-mail">
           {customer.email}
         </Item>
         <Item title="CPF">

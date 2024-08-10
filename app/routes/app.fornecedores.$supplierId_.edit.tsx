@@ -69,7 +69,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const fieldErrors = {
     name: validateRequired(name, "Nome"),
     cnpj: validateRequired(cnpj, "CNPJ") || validateCNPJ(cnpj) || (await validateUniqueCNPJ(cnpj, params.supplierId)),
-    email: validateRequired(email, "Email") || validateEmail(email),
+    email: validateRequired(email, "E-mail") || validateEmail(email),
     phone: validateRequired(phone, "Telefone") || validatePhone(phone),
     zipcode: zipcode.length > 0 ? validateCEP(zipcode) : undefined,
   };
@@ -113,7 +113,7 @@ export default function SupplierEdit () {
           attr={['email']}
           defaultValue={supplier.email}
           errorMessage={actionData?.fieldErrors?.email}
-          label="Email"
+          label="E-mail"
           required={true}
           type="email"
         />

@@ -10,7 +10,7 @@ import {
 import "./styles/tailwind.css";
 
 export const meta: MetaFunction = () => [
-  { title: "Jack Nili Modas" },
+  { title: "Jack & Nili Modas" },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

@@ -48,7 +48,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const fieldErrors = {
     name: validateRequired(name, "Nome"),
     cpf: validateRequired(cpf, "CPF") || validateCPF(cpf) || (await validateUniqueCPF(cpf)),
-    email: validateRequired(email, "Email") || validateEmail(email),
+    email: validateRequired(email, "E-mail") || validateEmail(email),
     phone: validateRequired(phone, "Telefone") || validatePhone(phone),
     zipcode: zipcode.length > 0 ? validateCEP(zipcode) : undefined,
   };
@@ -88,7 +88,7 @@ export default function CustomerCreate () {
           attr={['email']}
           errorMessage={actionData?.fieldErrors?.email}
           required={true}
-          label="Email"
+          label="E-mail"
           type="email"
         />
         <CpfInput

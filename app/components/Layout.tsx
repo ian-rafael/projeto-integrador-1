@@ -59,7 +59,7 @@ function Header ({username}: {username: string}) {
       )}
     >
       <h1 className="px-4">
-        <Link to="/app">Jack Nili Modas</Link>
+        <Link to="/app">Jack & Nili Modas</Link>
       </h1>
       <NavBar/>
       <div className="px-4 grid grid-cols-[1fr_auto] gap-px">

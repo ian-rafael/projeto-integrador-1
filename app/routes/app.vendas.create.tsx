@@ -35,11 +35,12 @@ async function createSale ({
 }) {
   const total = productItems.reduce((acc, {quantity, unitPrice}) => acc + (unitPrice * quantity), 0);
   const installments = [];
-  const value = total / Number(installmentQuantity);
+  const value = parseFloat((total / Number(installmentQuantity)).toFixed(2));
   for (let i = 0; i < Number(installmentQuantity); i++) {
     const dueDate = DateTime.fromISO(firstDueDate).plus({ month: i }).toJSDate();
     installments.push({ dueDate, value });
   }
+  installments[0].value += parseFloat((total - value * installments.length).toFixed(2));
 
   return db.sale.create({
     data: {
