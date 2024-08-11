@@ -97,7 +97,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     loan: {
       id: loan.id,
       createdAt: loan.createdAt,
-      dueDate: loan.dueDate,
+      dueDate: loan.dueDate.toISOString().slice(0, 10), // apenas a data, pra evitar dor de cabeça com timezone
       customerId: loan.customer.id,
       customerName: loan.customer.name,
       saleId: loan.sale?.id,

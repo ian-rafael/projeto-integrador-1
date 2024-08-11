@@ -52,6 +52,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       loanId: sale.loanId,
       installments: sale.installments.map((data, index) => ({
         ...data,
+        dueDate: data.dueDate.toISOString().slice(0, 10), // apenas a data, pra evitar dor de cabeça com timezone
+        paymentDate: data.paymentDate?.toISOString().slice(0, 10), // apenas a data, pra evitar dor de cabeça com timezone
         paid: data.status === $Enums.StatusParcela.PAGO,
         number: index + 1,
       })),

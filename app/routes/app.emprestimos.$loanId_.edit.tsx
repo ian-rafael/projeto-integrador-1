@@ -29,7 +29,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw json("Loan not found", { status: 404 });
   }
 
-  return json({ loan });
+  return json({ loan: {
+    ...loan,
+    dueDate: loan.dueDate.toISOString().slice(0, 10), // apenas a data, pra evitar dor de cabeça com timezone
+  } });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
